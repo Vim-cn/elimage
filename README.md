@@ -23,4 +23,4 @@ Requirement
 ===========
 * Python 3.2+
 * The `file` command
-* [https://github.com/lilydjwg/tornado/tree/lilydjwg](tornado with a patch)
+* [tornado with a patch](https://github.com/lilydjwg/tornado/tree/lilydjwg)
