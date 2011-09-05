@@ -56,7 +56,7 @@ class IndexHandler(tornado.web.RequestHandler):
     if len(ret) > 1:
       for i in ret.items():
         self.write('%s: %s'% i)
-    else:
+    elif ret:
       self.write(tuple(ret.values())[0])
 
 def main():
