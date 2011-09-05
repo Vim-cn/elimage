@@ -6,6 +6,7 @@ import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
+from functools import lru_cache
 
 import tornado.web
 import tornado.httpserver
@@ -14,6 +15,7 @@ from tornado.options import define, options
 define("port", default=8888, help="run on the given port", type=int)
 define("datadir", default='.', help="the directory to put uploaded data", type=str)
 
+@lru_cache()
 def guess_mime_using_file(path):
   result = subprocess.check_output(['file', '-i', path]).decode()
   _, mime, encoding = result.split()
