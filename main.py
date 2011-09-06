@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 # vim:fileencoding=utf-8
 
-# options
-DEBUG = True
-DEFAULT_DATA_DIR = '/tmp'
-PREFIX = r'/elimage' # this is a regex
-HOST = '' # override Host header, useful when behind another server
+from config import *
 
 import os
 import hashlib
@@ -78,7 +74,7 @@ class IndexHandler(BaseHandler):
 def main():
   import tornado.httpserver
   from tornado.options import define, options
-  define("port", default=8888, help="run on the given port", type=int)
+  define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
 
   tornado.options.parse_command_line()
