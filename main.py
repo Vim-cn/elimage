@@ -5,6 +5,7 @@
 DEBUG = True
 DEFAULT_DATA_DIR = '/tmp'
 PREFIX = r'/elimage' # this is a regex
+HOST = '' # override Host header, useful when behind another server
 
 import os
 import hashlib
@@ -32,7 +33,12 @@ def guess_mime_using_file(path):
   return mime, encoding
 mimetypes.guess_type = guess_mime_using_file
 
-class IndexHandler(tornado.web.RequestHandler):
+class BaseHandler(tornado.web.RequestHandler):
+  def initialize(self):
+    if self.settings['host']:
+      self.request.host = self.settings['host']
+
+class IndexHandler(BaseHandler):
   def get(self):
     #TODO
     self.write("curl -F 'name=@path/to/image' %s" % self.request.full_url())
@@ -82,6 +88,7 @@ def main():
       'path': options.datadir,
     }),
   ],
+    host=HOST,
     datadir=options.datadir,
     debug=DEBUG,
   )
