@@ -6,7 +6,15 @@ import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
-from functools import lru_cache
+try:
+  from functools import lru_cache
+except ImportError:
+  def lru_cache():
+    def wrapper(func):
+      def wrapper2(path):
+        return func(path)
+      return wrapper2
+    return wrapper
 
 import tornado.web
 import tornado.httpserver

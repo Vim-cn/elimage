@@ -21,6 +21,6 @@ curl -F 'name=@path/to/image' http://<your_host>/
 
 Requirement
 ===========
-* Python 3.2+
+* Python 2 or Python 3. Python 3.2+ is better as it makes use of [@lru_cache](http://docs.python.org/py3k/library/functools.html#functools.lru_cache)
 * The `file` command
 * [tornado with a patch](https://github.com/lilydjwg/tornado/tree/lilydjwg)
