@@ -88,7 +88,8 @@ def main():
     datadir=options.datadir,
     debug=DEBUG,
   )
-  http_server = tornado.httpserver.HTTPServer(application)
+  http_server = tornado.httpserver.HTTPServer(application,
+                                             xheaders=XHEADERS)
   http_server.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
 
