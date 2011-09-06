@@ -26,4 +26,4 @@ Requirement
 ===========
 * Python 2 or Python 3. Python 3.2+ is better as it makes use of [@lru_cache](http://docs.python.org/py3k/library/functools.html#functools.lru_cache)
 * The `file` command
-* [tornado with a patch](https://github.com/lilydjwg/tornado/tree/lilydjwg)
+* [tornado](https://github.com/facebook/tornado). A recent version (after [commit 39de229](https://github.com/facebook/tornado/commit/39de229e86bc67df62dd3bb40dd43245cb120295)) if using Python 3+.
