@@ -11,6 +11,7 @@ import subprocess
 try:
   from functools import lru_cache
 except ImportError:
+  # fallback
   def lru_cache():
     def wrapper(func):
       def wrapper2(path):
@@ -47,6 +48,7 @@ class IndexHandler(BaseHandler):
     ret = OrderedDict()
     for filelist in files.values():
       for file in filelist:
+        #FIXME: avoid forgery
         if not (os.path.splitext(file['filename'])[1][1:].lower() in ('png', 'jpg', 'gif') \
                 or file['content_type'].startswith('image/')):
           ret[file['filename']] = 'error: not an image.\n'
