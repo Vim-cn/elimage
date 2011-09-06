@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # vim:fileencoding=utf-8
 
+# options
+DEBUG = True
+DEFAULT_DATA_DIR = '/tmp'
+PREFIX = r'/elimage' # this is a regex
+
 import os
 import hashlib
 from collections import OrderedDict
@@ -17,11 +22,6 @@ except ImportError:
     return wrapper
 
 import tornado.web
-import tornado.httpserver
-from tornado.options import define, options
-
-define("port", default=8888, help="run on the given port", type=int)
-define("datadir", default='.', help="the directory to put uploaded data", type=str)
 
 @lru_cache()
 def guess_mime_using_file(path):
@@ -47,7 +47,7 @@ class IndexHandler(tornado.web.RequestHandler):
       for file in filelist:
         if not (os.path.splitext(file['filename'])[1][1:].lower() in ('png', 'jpg', 'gif') \
                 or file['content_type'].startswith('image/')):
-          ret[file['filename']] = 'error: not an image.\n' 
+          ret[file['filename']] = 'error: not an image.\n'
         else:
           m = hashlib.sha1()
           m.update(file['body'])
@@ -60,8 +60,8 @@ class IndexHandler(tornado.web.RequestHandler):
           fpath = os.path.join(p, f)
           if not os.path.exists(fpath):
             open(fpath, 'wb').write(file['body'])
-          ret[file['filename']] = '%s://%s/%s/%s\n' % (
-              self.request.protocol, self.request.host, d, f
+          ret[file['filename']] = '%s/%s/%s\n' % (
+              self.request.full_url().rstrip('/'), d, f
           )
     if len(ret) > 1:
       for i in ret.items():
@@ -70,6 +70,11 @@ class IndexHandler(tornado.web.RequestHandler):
       self.write(tuple(ret.values())[0])
 
 def main():
+  import tornado.httpserver
+  from tornado.options import define, options
+  define("port", default=8888, help="run on the given port", type=int)
+  define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
+
   tornado.options.parse_command_line()
   application = tornado.web.Application([
     (r"/", IndexHandler),
@@ -78,14 +83,29 @@ def main():
     }),
   ],
     datadir=options.datadir,
-    debug=True,
+    debug=DEBUG,
   )
   http_server = tornado.httpserver.HTTPServer(application)
   http_server.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
+
+def wsgi():
+  import tornado.wsgi
+  global application
+  application = tornado.wsgi.WSGIApplication([
+    (PREFIX+r"/", IndexHandler),
+    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})", tornado.web.StaticFileHandler, {
+      'path': DEFAULT_DATA_DIR,
+    }),
+  ],
+    datadir=DEFAULT_DATA_DIR,
+    debug=DEBUG,
+  )
 
 if __name__ == "__main__":
   try:
     main()
   except KeyboardInterrupt:
     pass
+else:
+  wsgi()

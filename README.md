@@ -4,10 +4,11 @@ Usage
 =====
 Run it
 ------
-Just execute it!
+As a standalone web server, just execute it. As a WSGI application, you may
+want to specify a new `PREFIX` pattern to meet your server configuration.
 
-By default it runs at port `8888`, with current working directory as data
-directory to store image files. Try option `--help` to know how to change them.
+By default it runs at port `8888`, with `/tmp` as data directory to store image
+files. Try option `--help` to know how to change them.
 
 Upload images
 -------------
