@@ -39,7 +39,7 @@ class IndexHandler(tornado.web.RequestHandler):
       for file in filelist:
         if not (os.path.splitext(file['filename'])[1][1:].lower() in ('png', 'jpg', 'gif') \
                 or file['content_type'].startswith('image/')):
-          self.write('ERROR: file %s is not an image.\n' % file['filename'])
+          ret[file['filename']] = 'error: not an image.\n' 
         else:
           m = hashlib.sha1()
           m.update(file['body'])
