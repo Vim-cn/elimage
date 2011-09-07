@@ -20,6 +20,7 @@ except ImportError:
     return wrapper
 
 import tornado.web
+import tornado.template
 
 @lru_cache()
 def guess_mime_using_file(path):
@@ -36,9 +37,16 @@ class BaseHandler(tornado.web.RequestHandler):
       self.request.host = self.settings['host']
 
 class IndexHandler(BaseHandler):
+  index_template = None
   def get(self):
-    #TODO
-    self.write("curl -F 'name=@path/to/image' %s" % self.request.full_url())
+    # self.render() would compress whitespace after it meets '{{' even in <pre>
+    if self.index_template is None:
+      self.index_template = tornado.template.Template(
+        open(os.path.join(self.settings['template_path'], 'index.html'), 'r').read(),
+        compress_whitespace=False,
+      )
+    content = self.index_template.generate(url=self.request.full_url())
+    self.write(content)
 
   def post(self):
     files = self.request.files
@@ -89,6 +97,7 @@ def main():
     host=HOST,
     datadir=options.datadir,
     debug=DEBUG,
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
   )
   http_server = tornado.httpserver.HTTPServer(application,
                                              xheaders=XHEADERS)
@@ -106,6 +115,7 @@ def wsgi():
   ],
     datadir=DEFAULT_DATA_DIR,
     debug=DEBUG,
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
   )
 
 if __name__ == "__main__":
