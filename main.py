@@ -59,7 +59,6 @@ class IndexHandler(BaseHandler):
         raise tornado.web.HTTPError(403, 'You are on our blacklist.')
       else:
         uid = user['id']
-    print(uid)
 
     files = self.request.files
     if not files:
