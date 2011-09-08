@@ -79,7 +79,9 @@ class Model:
     method = getattr(self, 'get_user_by_'+type, None)
     if callable(method):
       row = method(data)
-    return row['blocked'] == 1
+      return row['blocked'] == 1
+    else:
+      return None
 
 #
 
