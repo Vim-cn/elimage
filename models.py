@@ -13,7 +13,6 @@ __all__ = ['model']
 
 #
 
-logging.basicConfig(filename='dberror.log')
 def log(fn):
   def wrapped(*args, **kwds):
     try:
