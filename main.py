@@ -2,6 +2,7 @@
 # vim:fileencoding=utf-8
 
 from config import *
+from models import model
 
 import os
 import hashlib
@@ -49,9 +50,20 @@ class IndexHandler(BaseHandler):
     self.write(content)
 
   def post(self):
+    # Check the user has been blocked or not
+    user = model.get_user_by_ip(self.request.remote_ip)
+    if user is None:
+      uid = model.add_user(self.request.remote_ip)
+    else:
+      if user['blocked']:
+        raise tornado.web.HTTPError(403, 'You are on our blacklist.')
+      else:
+        uid = user['id']
+    print(uid)
+
     files = self.request.files
     if not files:
-      raise tornado.web.HTTPError(400, 'upload your image please')
+      raise tornado.web.HTTPError(403, 'upload your image please')
 
     ret = OrderedDict()
     for filelist in files.values():
@@ -64,6 +76,7 @@ class IndexHandler(BaseHandler):
           m = hashlib.sha1()
           m.update(file['body'])
           h = m.hexdigest()
+          model.add_image(uid, h)
           d = h[:2]
           f = h[2:]
           p = os.path.join(self.settings['datadir'], d)
