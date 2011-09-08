@@ -63,7 +63,7 @@ class IndexHandler(BaseHandler):
 
     files = self.request.files
     if not files:
-      raise tornado.web.HTTPError(403, 'upload your image please')
+      raise tornado.web.HTTPError(400, 'upload your image please')
 
     ret = OrderedDict()
     for filelist in files.values():
