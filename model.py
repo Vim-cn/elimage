@@ -9,7 +9,7 @@ from config import DB
 
 #
 
-__all__ = ['user', 'image']
+__all__ = ['User', 'Image']
 
 #
 
