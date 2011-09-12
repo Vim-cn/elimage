@@ -2,9 +2,10 @@
 # vim:fileencoding=utf-8
 
 from config import *
-from models import model
+from model import User, Image
 
 import os
+import time
 import hashlib
 from collections import OrderedDict
 import mimetypes
@@ -51,9 +52,12 @@ class IndexHandler(BaseHandler):
 
   def post(self):
     # Check the user has been blocked or not
-    user = model.get_user_by_ip(self.request.remote_ip)
+    user_obj = User()
+    user = user_obj.fetchone(('ip', self.request.remote_ip))
     if user is None:
-      uid = model.add_user(self.request.remote_ip)
+      user_obj.ip = self.request.remote_ip
+      user_obj.put()
+      uid = user_obj.lastrowid
     else:
       if user['blocked']:
         raise tornado.web.HTTPError(403, 'You are on our blacklist.')
@@ -75,7 +79,12 @@ class IndexHandler(BaseHandler):
           m = hashlib.sha1()
           m.update(file['body'])
           h = m.hexdigest()
-          model.add_image(uid, h)
+          img_obj = Image()
+          if img_obj.get_by_name(h) is None:
+            img_obj.uid = uid
+            img_obj.name = h
+            img_obj.time = int(time.time())
+            img_obj.put()
           d = h[:2]
           f = h[2:]
           p = os.path.join(self.settings['datadir'], d)
