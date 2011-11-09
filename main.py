@@ -23,6 +23,8 @@ except ImportError:
 import tornado.web
 import tornado.template
 
+SCRIPT_PATH = 'elimage'
+
 @lru_cache()
 def guess_mime_using_file(path):
   result = subprocess.check_output(['file', '-i', path]).decode()
@@ -93,6 +95,11 @@ class IndexHandler(BaseHandler):
     elif ret:
       self.write(tuple(ret.values())[0])
 
+class ToolHandler(BaseHandler):
+  def get(self):
+    self.set_header('Content-Type', 'text/x-python')
+    self.render('elimage', url=self.request.full_url()[:-len(SCRIPT_PATH)])
+
 def main():
   import tornado.httpserver
   from tornado.options import define, options
@@ -102,6 +109,7 @@ def main():
   tornado.options.parse_command_line()
   application = tornado.web.Application([
     (r"/", IndexHandler),
+    (r"/" + SCRIPT_PATH, ToolHandler),
     (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})", tornado.web.StaticFileHandler, {
       'path': options.datadir,
     }),
@@ -121,6 +129,7 @@ def wsgi():
   global application
   application = tornado.wsgi.WSGIApplication([
     (PREFIX+r"/", IndexHandler),
+    (PREFIX+r"/" + SCRIPT_PATH, ToolHandler),
     (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})", tornado.web.StaticFileHandler, {
       'path': DEFAULT_DATA_DIR,
     }),
