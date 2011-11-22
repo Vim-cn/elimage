@@ -5,6 +5,7 @@ from config import *
 from models import model
 
 import os
+import sys
 import hashlib
 from collections import OrderedDict
 import mimetypes
@@ -105,8 +106,13 @@ def main():
   from tornado.options import define, options
   define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
+  define("fork", default=False, help="fork after startup", type=bool)
 
   tornado.options.parse_command_line()
+  if options.fork:
+    if os.fork():
+      sys.exit()
+
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
