@@ -116,7 +116,7 @@ def main():
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
-    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})", tornado.web.StaticFileHandler, {
+    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)", tornado.web.StaticFileHandler, {
       'path': options.datadir,
     }),
   ],
@@ -136,7 +136,7 @@ def wsgi():
   application = tornado.wsgi.WSGIApplication([
     (PREFIX+r"/", IndexHandler),
     (PREFIX+r"/" + SCRIPT_PATH, ToolHandler),
-    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})", tornado.web.StaticFileHandler, {
+    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)", tornado.web.StaticFileHandler, {
       'path': DEFAULT_DATA_DIR,
     }),
   ],
