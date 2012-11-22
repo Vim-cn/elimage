@@ -8,5 +8,5 @@ from subprocess import call
 args = []
 for f in sys.argv[1:]:
   args.extend(['-F', 'name=@'+f])
-cmd = ['curl', dest_url] + args
+cmd = ['curl', '--compressed', dest_url] + args
 sys.exit(call(cmd))
