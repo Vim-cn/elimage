@@ -71,7 +71,7 @@ class IndexHandler(BaseHandler):
     for filelist in files.values():
       for file in filelist:
         #FIXME: avoid forgery
-        if not (os.path.splitext(file['filename'])[1][1:].lower() in ('png', 'jpg', 'gif') \
+        if not (os.path.splitext(file['filename'])[1][1:].lower() in ('png', 'jpg', 'gif', 'svg') \
                 or file['content_type'].startswith('image/')):
           ret[file['filename']] = 'error: not an image.\n'
         else:
