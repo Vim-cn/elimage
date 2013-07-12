@@ -87,6 +87,14 @@ class IndexHandler(BaseHandler):
           fpath = os.path.join(p, f)
           if not os.path.exists(fpath):
             open(fpath, 'wb').write(file['body'])
+
+          ftype = mimetypes.guess_type(fpath)[0]
+          ext = None
+          if ftype:
+            ext = mimetypes.guess_extension(ftype)
+          if ext:
+            f = f + ext
+
           ret[file['filename']] = '%s/%s/%s\n' % (
               self.request.full_url().rstrip('/'), d, f
           )
