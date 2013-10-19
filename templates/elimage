@@ -3,10 +3,16 @@
 
 # you may want change this
 dest_url = '{{ url }}'
+
 import sys
-from subprocess import call
-args = []
+from subprocess import Popen, PIPE
+
 for f in sys.argv[1:]:
   args.extend(['-F', 'name=@'+f])
+args = []
 cmd = ['curl', '--compressed', dest_url] + args
-sys.exit(call(cmd))
+p = Popen(cmd, stdout=PIPE)
+ret = p.wait()
+url = p.stdout.read()
+sys.stdout.buffer.write(url)
+sys.exit(ret)
