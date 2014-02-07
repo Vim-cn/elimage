@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# vim:fileencoding=utf-8
 
 from config import *
 from models import model
@@ -109,6 +108,20 @@ class ToolHandler(BaseHandler):
     self.set_header('Content-Type', 'text/x-python')
     self.render('elimage', url=self.request.full_url()[:-len(SCRIPT_PATH)])
 
+class HashHandler(BaseHandler):
+  def get(self, p):
+    if '.' in p:
+      h, ext = p.split('.', 1)
+      ext = '.' + ext
+    else:
+      h, ext = p, ''
+
+    h = h.replace('/', '')
+    if len(h) != 40:
+      raise tornado.web.HTTPError(404)
+    else:
+      self.redirect('/%s/%s%s' % (h[:2], h[2:], ext), permanent=True)
+
 def main():
   import tornado.httpserver
   from tornado.options import define, options
@@ -127,6 +140,7 @@ def main():
     (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", tornado.web.StaticFileHandler, {
       'path': options.datadir,
     }),
+    (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
   ],
     host=HOST,
     datadir=options.datadir,
@@ -134,7 +148,7 @@ def main():
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
   )
   http_server = tornado.httpserver.HTTPServer(application,
-                                             xheaders=XHEADERS)
+                                              xheaders=XHEADERS)
   http_server.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
 

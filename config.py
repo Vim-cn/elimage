@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# vim:fileencoding=utf-8
-
 DEBUG = True
 DEFAULT_DATA_DIR = '/tmp'
 DEFAULT_PORT = 8888
