@@ -70,33 +70,27 @@ class IndexHandler(BaseHandler):
     for filelist in files.values():
       for file in filelist:
         #FIXME: avoid forgery
-        if not (os.path.splitext(file['filename'])[1][1:].lower() in ('png', 'jpg', 'gif', 'svg') \
-                or file['content_type'].startswith('image/')):
-          ret[file['filename']] = 'error: not an image.\n'
-        else:
-          m = hashlib.sha1()
-          m.update(file['body'])
-          h = m.hexdigest()
-          model.add_image(uid, h)
-          d = h[:2]
-          f = h[2:]
-          p = os.path.join(self.settings['datadir'], d)
-          if not os.path.exists(p):
-            os.mkdir(p, 0o750)
-          fpath = os.path.join(p, f)
-          if not os.path.exists(fpath):
-            open(fpath, 'wb').write(file['body'])
-
+        m = hashlib.sha1()
+        m.update(file['body'])
+        h = m.hexdigest()
+        model.add_image(uid, h)
+        d = h[:2]
+        f = h[2:]
+        p = os.path.join(self.settings['datadir'], d)
+        if not os.path.exists(p):
+          os.mkdir(p, 0o750)
+        fpath = os.path.join(p, f)
+        if not os.path.exists(fpath):
+          open(fpath, 'wb').write(file['body'])
           ftype = mimetypes.guess_type(fpath)[0]
-          ext = None
-          if ftype:
-            ext = mimetypes.guess_extension(ftype)
-          if ext:
-            f = f + ext
-
+        ext = None
+        if ftype:
+          ext = mimetypes.guess_extension(ftype)
+        if ext:
+          f = f + ext
           ret[file['filename']] = '%s/%s/%s\n' % (
-              self.request.full_url().rstrip('/'), d, f
-          )
+            self.request.full_url().rstrip('/'), d, f
+        )
     if len(ret) > 1:
       for i in ret.items():
         self.write('%s: %s'% i)
