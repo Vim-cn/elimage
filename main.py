@@ -82,7 +82,8 @@ class IndexHandler(BaseHandler):
         fpath = os.path.join(p, f)
         if not os.path.exists(fpath):
           open(fpath, 'wb').write(file['body'])
-          ftype = mimetypes.guess_type(fpath)[0]
+        
+        ftype = mimetypes.guess_type(fpath)[0]
         ext = None
         if ftype:
           ext = mimetypes.guess_extension(ftype)
