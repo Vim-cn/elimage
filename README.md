@@ -33,6 +33,4 @@ Requirement
 
 TODO
 ====
-* make sure what is uploaded are images
 * record the original image filename
-* add web uploading support
