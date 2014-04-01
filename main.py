@@ -69,7 +69,6 @@ class IndexHandler(BaseHandler):
     ret = OrderedDict()
     for filelist in files.values():
       for file in filelist:
-        #FIXME: avoid forgery
         m = hashlib.sha1()
         m.update(file['body'])
         h = m.hexdigest()
@@ -82,15 +81,16 @@ class IndexHandler(BaseHandler):
         fpath = os.path.join(p, f)
         if not os.path.exists(fpath):
           open(fpath, 'wb').write(file['body'])
-          ftype = mimetypes.guess_type(fpath)[0]
+
+        ftype = mimetypes.guess_type(fpath)[0]
         ext = None
         if ftype:
           ext = mimetypes.guess_extension(ftype)
         if ext:
-          f = f + ext
+          f += ext
           ret[file['filename']] = '%s/%s/%s\n' % (
             self.request.full_url().rstrip('/'), d, f
-        )
+          )
     if len(ret) > 1:
       for i in ret.items():
         self.write('%s: %s'% i)
