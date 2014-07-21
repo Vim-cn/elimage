@@ -7,9 +7,9 @@ dest_url = '{{ url }}'
 import sys
 from subprocess import Popen, PIPE
 
+args = []
 for f in sys.argv[1:]:
   args.extend(['-F', 'name=@'+f])
-args = []
 cmd = ['curl', '--compressed', dest_url] + args
 p = Popen(cmd, stdout=PIPE)
 ret = p.wait()
