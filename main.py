@@ -34,6 +34,12 @@ def guess_mime_using_file(path):
   return mime, encoding
 mimetypes.guess_type = guess_mime_using_file
 
+def guess_extension(type):
+  ext = mimetypes.guess_extension(ftype)
+  if ext == '.jpe':
+    ext = '.jpg'
+  return ext
+
 class BaseHandler(tornado.web.RequestHandler):
   def initialize(self):
     if self.settings['host']:
@@ -85,7 +91,7 @@ class IndexHandler(BaseHandler):
         ftype = mimetypes.guess_type(fpath)[0]
         ext = None
         if ftype:
-          ext = mimetypes.guess_extension(ftype)
+          ext = guess_extension(ftype)
         if ext:
           f += ext
           ret[file['filename']] = '%s/%s/%s\n' % (
