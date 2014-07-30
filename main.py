@@ -34,7 +34,7 @@ def guess_mime_using_file(path):
   return mime, encoding
 mimetypes.guess_type = guess_mime_using_file
 
-def guess_extension(type):
+def guess_extension(ftype):
   ext = mimetypes.guess_extension(ftype)
   if ext == '.jpe':
     ext = '.jpg'
