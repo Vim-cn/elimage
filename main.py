@@ -31,12 +31,24 @@ def guess_mime_using_file(path):
   _, mime, encoding = result.split()
   mime = mime.rstrip(';')
   encoding = encoding.split('=')[-1]
+
+  if mime == 'application/octet-stream':
+    result = subprocess.check_output(['file', path]).decode()
+    _, desc = result.split(None, 1)
+    if 'Web/P image' in desc:
+      return 'image/webp', 'binary'
+
   return mime, encoding
+
 mimetypes.guess_type = guess_mime_using_file
 
 def guess_extension(ftype):
+  if ftype == 'application/octet-stream':
+    return '.bin'
+  elif ftype == 'image/webp':
+    return '.webp'
   ext = mimetypes.guess_extension(ftype)
-  if ext == '.jpe':
+  if ext in ('.jpe', '.jpeg'):
     ext = '.jpg'
   return ext
 
