@@ -62,12 +62,17 @@ class IndexHandler(BaseHandler):
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
     if self.index_template is None:
-      self.index_template = tornado.template.Template(
-        open(os.path.join(self.settings['template_path'], 'index.html'), 'r').read(),
-        compress_whitespace=False,
-      )
-    content = self.index_template.generate(url=self.request.full_url())
-    self.write(content)
+      try:
+        file_name = os.path.join(self.settings['template_path'], 'index.html')
+        with open(file_name, 'r') as index_file:
+          text = index_file.read()
+          self.index_template = tornado.template.Template(text,
+                  compress_whitespace=False)
+          content = self.index_template.generate(url=self.request.full_url())
+          self.write(content)
+      except IOError as err:
+        raise tornado.web.HTTPError(404, 'index.html file is missing')
+        print('index.html file: ' + str(err))
 
   def post(self):
     # Check the user has been blocked or not
