@@ -5,10 +5,12 @@ from models import model
 
 import os
 import sys
+import logging
 import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
+
 try:
   from functools import lru_cache
 except ImportError:
@@ -52,22 +54,22 @@ def guess_extension(ftype):
     ext = '.jpg'
   return ext
 
-class BaseHandler(tornado.web.RequestHandler):
-  def initialize(self):
-    if self.settings['host']:
-      self.request.host = self.settings['host']
-
-class IndexHandler(BaseHandler):
+class IndexHandler(tornado.web.RequestHandler):
   index_template = None
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
     if self.index_template is None:
-      self.index_template = tornado.template.Template(
-        open(os.path.join(self.settings['template_path'], 'index.html'), 'r').read(),
-        compress_whitespace=False,
-      )
-    content = self.index_template.generate(url=self.request.full_url())
-    self.write(content)
+      try:
+        file_name = os.path.join(self.settings['template_path'], 'index.html')
+        with open(file_name, 'r') as index_file:
+          text = index_file.read()
+          self.index_template = tornado.template.Template(text,
+                  compress_whitespace=False)
+          content = self.index_template.generate(url=self.request.full_url())
+          self.write(content)
+      except IOError:
+        logging.exception('failed to open the file: %s', file_name)
+        raise tornado.web.HTTPError(404, 'index.html is missing')
 
   def post(self):
     # Check the user has been blocked or not
@@ -98,7 +100,13 @@ class IndexHandler(BaseHandler):
           os.mkdir(p, 0o750)
         fpath = os.path.join(p, f)
         if not os.path.exists(fpath):
-          open(fpath, 'wb').write(file['body'])
+          try:
+            with open(fpath, 'wb') as img_file:
+              img_file.write(file['body'])
+          except IOError: 
+            logging.exception('failed to open the file: %s', fpath)
+            ret[file['filename']] = 'FAIL'
+            continue
 
         ftype = mimetypes.guess_type(fpath)[0]
         ext = None
@@ -106,21 +114,26 @@ class IndexHandler(BaseHandler):
           ext = guess_extension(ftype)
         if ext:
           f += ext
-          ret[file['filename']] = '%s/%s/%s\n' % (
-            self.request.full_url().rstrip('/'), d, f
-          )
-    if len(ret) > 1:
-      for i in ret.items():
-        self.write('%s: %s'% i)
-    elif ret:
-      self.write(tuple(ret.values())[0])
+          ret[file['filename']] = '%s/%s/%s' % (
+                  self.request.full_url().rstrip('/'), d, f)
 
-class ToolHandler(BaseHandler):
+    if len(ret) > 1:
+      for item in ret.items():
+        self.write('%s: %s\n' % item)
+        if item[1] == "FAIL":
+          self.set_status(500)
+    elif ret:
+      img_url = tuple(ret.values())[0]
+      self.write("%s\n" % img_url)
+      if img_url == "FAIL":
+        self.set_status(500)
+
+class ToolHandler(tornado.web.RequestHandler):
   def get(self):
     self.set_header('Content-Type', 'text/x-python')
     self.render('elimage', url=self.request.full_url()[:-len(SCRIPT_PATH)])
 
-class HashHandler(BaseHandler):
+class HashHandler(tornado.web.RequestHandler):
   def get(self, p):
     if '.' in p:
       h, ext = p.split('.', 1)
@@ -137,6 +150,7 @@ class HashHandler(BaseHandler):
 def main():
   import tornado.httpserver
   from tornado.options import define, options
+
   define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
@@ -154,7 +168,6 @@ def main():
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
   ],
-    host=HOST,
     datadir=options.datadir,
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
