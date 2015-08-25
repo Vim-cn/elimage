@@ -1,6 +1,6 @@
 elimage.db
 *~
 *.bak
-.*.swap
+.*.swp
 
 /__pycache__
