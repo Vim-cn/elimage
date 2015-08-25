@@ -156,6 +156,10 @@ def main():
     if os.fork():
       sys.exit()
 
+  host = HOST
+  if DEFAULT_PORT!= 80 and host.find(':') == -1:
+      host += ':' + str(DEFAULT_PORT)
+
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
@@ -164,7 +168,7 @@ def main():
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
   ],
-    host=HOST,
+    host=host,
     datadir=options.datadir,
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
