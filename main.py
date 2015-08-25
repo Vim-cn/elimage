@@ -103,7 +103,12 @@ class IndexHandler(BaseHandler):
           os.mkdir(p, 0o750)
         fpath = os.path.join(p, f)
         if not os.path.exists(fpath):
-          open(fpath, 'wb').write(file['body'])
+          try:
+            with open(fpath, 'wb') as img_file:
+              img_file.write(file['body'])
+          except IOError as err: 
+            print("image file: " + str(err))
+            continue
 
         ftype = mimetypes.guess_type(fpath)[0]
         ext = None
