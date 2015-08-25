@@ -147,6 +147,18 @@ class HashHandler(BaseHandler):
 def main():
   import tornado.httpserver
   from tornado.options import define, options
+
+  host = HOST
+  port = DEFAULT_PORT
+  idx = host.find(':')
+  if DEFAULT_PORT != 80 and idx == -1:
+    host += ':' + str(DEFAULT_PORT)
+  elif idx != -1:
+    port = int(host[idx+1:])
+    if port != DEFAULT_PORT:
+      print("warning: DEFAULT_PORT %d is not equal host port %d, using %d" %
+              (DEFAULT_PORT, port, port))
+
   define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
@@ -155,10 +167,6 @@ def main():
   if options.fork:
     if os.fork():
       sys.exit()
-
-  host = HOST
-  if DEFAULT_PORT!= 80 and host.find(':') == -1:
-      host += ':' + str(DEFAULT_PORT)
 
   application = tornado.web.Application([
     (r"/", IndexHandler),
