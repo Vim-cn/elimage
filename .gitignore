@@ -3,4 +3,4 @@ elimage.db
 *.bak
 .*.swp
 
-/__pycache__
+__pycache__/
