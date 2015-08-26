@@ -56,8 +56,11 @@ def guess_extension(ftype):
 
 class BaseHandler(tornado.web.RequestHandler):
   def initialize(self):
-    if self.settings['host']:
-      self.request.host = self.settings['host']
+    try:
+      if self.settings['host']:
+        self.request.host = self.settings['host']
+    except KeyError:
+      pass
 
 class IndexHandler(BaseHandler):
   index_template = None
@@ -73,7 +76,7 @@ class IndexHandler(BaseHandler):
           content = self.index_template.generate(url=self.request.full_url())
           self.write(content)
       except IOError as err:
-        logging.exception('index.html file: ' + str(err))
+        logging.exception('index.html file: %s', str(err))
         raise tornado.web.HTTPError(404, 'index.html file is missing')
 
   def post(self):
@@ -109,7 +112,7 @@ class IndexHandler(BaseHandler):
             with open(fpath, 'wb') as img_file:
               img_file.write(file['body'])
           except IOError as err: 
-            logging.exception("image file: " + str(err))
+            logging.exception("image file: %s", str(err))
             continue
 
         ftype = mimetypes.guess_type(fpath)[0]
@@ -150,18 +153,7 @@ def main():
   import tornado.httpserver
   from tornado.options import define, options
 
-  host = HOST
-  port = DEFAULT_PORT
-  idx = host.find(':')
-  if DEFAULT_PORT != 80 and idx == -1:
-    host += ':' + str(DEFAULT_PORT)
-  elif idx != -1:
-    port = int(host[idx+1:])
-    if port != DEFAULT_PORT:
-      logging.warning("DEFAULT_PORT %d is not equal host port %d, using %d" %
-              (DEFAULT_PORT, port, port))
-
-  define("port", default=port, help="run on the given port", type=int)
+  define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
 
@@ -178,7 +170,6 @@ def main():
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
   ],
-    host=host,
     datadir=options.datadir,
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
