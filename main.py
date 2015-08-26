@@ -5,10 +5,12 @@ from models import model
 
 import os
 import sys
+import logging
 import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
+
 try:
   from functools import lru_cache
 except ImportError:
@@ -71,8 +73,8 @@ class IndexHandler(BaseHandler):
           content = self.index_template.generate(url=self.request.full_url())
           self.write(content)
       except IOError as err:
+        logging.exception('index.html file: ' + str(err))
         raise tornado.web.HTTPError(404, 'index.html file is missing')
-        print('index.html file: ' + str(err))
 
   def post(self):
     # Check the user has been blocked or not
@@ -107,7 +109,7 @@ class IndexHandler(BaseHandler):
             with open(fpath, 'wb') as img_file:
               img_file.write(file['body'])
           except IOError as err: 
-            print("image file: " + str(err))
+            logging.exception("image file: " + str(err))
             continue
 
         ftype = mimetypes.guess_type(fpath)[0]
@@ -156,10 +158,10 @@ def main():
   elif idx != -1:
     port = int(host[idx+1:])
     if port != DEFAULT_PORT:
-      print("warning: DEFAULT_PORT %d is not equal host port %d, using %d" %
+      logging.warning("DEFAULT_PORT %d is not equal host port %d, using %d" %
               (DEFAULT_PORT, port, port))
 
-  define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
+  define("port", default=port, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
 
