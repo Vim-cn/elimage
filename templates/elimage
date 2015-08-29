@@ -10,7 +10,7 @@ from subprocess import Popen, PIPE
 args = []
 for f in sys.argv[1:]:
   if f == '-':
-    args.extend(['-F', 'name=@-;-.png'])
+    args.extend(['-F', 'name=@-;filename=-.png'])
   else:
     args.extend(['-F', 'name=@'+f])
 cmd = ['curl', '--compressed', dest_url] + args
