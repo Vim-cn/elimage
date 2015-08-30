@@ -105,8 +105,7 @@ class IndexHandler(tornado.web.RequestHandler):
               img_file.write(file['body'])
           except IOError: 
             logging.exception('failed to open the file: %s', fpath)
-            self.write('failed to upload the file: %s\n' % file['filename'])
-            ret[file['filename']] = 'fail'
+            ret[file['filename']] = 'FAIL'
             continue
 
         ftype = mimetypes.guess_type(fpath)[0]
@@ -121,8 +120,13 @@ class IndexHandler(tornado.web.RequestHandler):
     if len(ret) > 1:
       for item in ret.items():
         self.write('%s: %s\n' % item)
+        if item[1] == "FAIL":
+          self.set_status(500)
     elif ret:
-      self.write("%s\n" % tuple(ret.values())[0])
+      img_url = tuple(ret.values())[0]
+      self.write("%s\n" % img_url)
+      if img_url == "FAIL":
+        self.set_status(500)
 
 class ToolHandler(tornado.web.RequestHandler):
   def get(self):
