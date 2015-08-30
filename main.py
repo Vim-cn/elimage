@@ -54,15 +54,7 @@ def guess_extension(ftype):
     ext = '.jpg'
   return ext
 
-class BaseHandler(tornado.web.RequestHandler):
-  def initialize(self):
-    try:
-      if self.settings['host']:
-        self.request.host = self.settings['host']
-    except KeyError:
-      pass
-
-class IndexHandler(BaseHandler):
+class IndexHandler(tornado.web.RequestHandler):
   index_template = None
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
@@ -130,12 +122,12 @@ class IndexHandler(BaseHandler):
       for item in ret.items():
         self.write('%s: %s\n' % item)
 
-class ToolHandler(BaseHandler):
+class ToolHandler(tornado.web.RequestHandler):
   def get(self):
     self.set_header('Content-Type', 'text/x-python')
     self.render('elimage', url=self.request.full_url()[:-len(SCRIPT_PATH)])
 
-class HashHandler(BaseHandler):
+class HashHandler(tornado.web.RequestHandler):
   def get(self, p):
     if '.' in p:
       h, ext = p.split('.', 1)
