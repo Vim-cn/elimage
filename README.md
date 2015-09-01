@@ -22,7 +22,7 @@ You can specify multiple `-F` parameters for multiple image files. The name of
 the form field doesn't matter.
 
 ```sh
-curl -F 'name=@path/to/image' http://<your_host>[:port]/
+curl -F 'name=@path/to/image' http://<your_host>/
 ```
 
 Requirement
