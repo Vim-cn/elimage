@@ -63,13 +63,14 @@ class IndexHandler(tornado.web.RequestHandler):
         file_name = os.path.join(self.settings['template_path'], 'index.html')
         with open(file_name, 'r') as index_file:
           text = index_file.read()
-          self.index_template = tornado.template.Template(text,
-                  compress_whitespace=False)
-          content = self.index_template.generate(url=self.request.full_url())
-          self.write(content)
       except IOError:
         logging.exception('failed to open the file: %s', file_name)
         raise tornado.web.HTTPError(404, 'index.html is missing')
+      else:
+        self.index_template = tornado.template.Template(
+          text, compress_whitespace=False)
+        content = self.index_template.generate(url=self.request.full_url())
+        self.write(content)
 
   def post(self):
     # Check the user has been blocked or not
@@ -103,9 +104,10 @@ class IndexHandler(tornado.web.RequestHandler):
           try:
             with open(fpath, 'wb') as img_file:
               img_file.write(file['body'])
-          except IOError: 
+          except IOError:
             logging.exception('failed to open the file: %s', fpath)
             ret[file['filename']] = 'FAIL'
+            self.set_status(500)
             continue
 
         ftype = mimetypes.guess_type(fpath)[0]
@@ -115,18 +117,14 @@ class IndexHandler(tornado.web.RequestHandler):
         if ext:
           f += ext
           ret[file['filename']] = '%s/%s/%s' % (
-                  self.request.full_url().rstrip('/'), d, f)
+            self.request.full_url().rstrip('/'), d, f)
 
     if len(ret) > 1:
       for item in ret.items():
         self.write('%s: %s\n' % item)
-        if item[1] == "FAIL":
-          self.set_status(500)
     elif ret:
       img_url = tuple(ret.values())[0]
       self.write("%s\n" % img_url)
-      if img_url == "FAIL":
-        self.set_status(500)
 
 class ToolHandler(tornado.web.RequestHandler):
   def get(self):
