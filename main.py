@@ -24,6 +24,8 @@ except ImportError:
 
 import tornado.web
 import tornado.template
+import tornado.gen
+import tornado.process
 
 SCRIPT_PATH = 'elimage'
 
@@ -57,6 +59,13 @@ def guess_extension(ftype):
   if ext in ('.jpe', '.jpeg'):
     ext = '.jpg'
   return ext
+
+@tornado.gen.coroutine
+def convert_webp(webp, png):
+  cmd = ['convert', '-interlace', 'PNG', webp, png]
+  logging.info('convert webp to png: %s', webp)
+  p = tornado.process.Subprocess(cmd)
+  yield p.wait_for_exit()
 
 class IndexHandler(tornado.web.RequestHandler):
   index_template = None
@@ -149,6 +158,37 @@ class HashHandler(tornado.web.RequestHandler):
     else:
       self.redirect('/%s/%s%s' % (h[:2], h[2:], ext), permanent=True)
 
+class MyStaticFileHandler(tornado.web.StaticFileHandler):
+  '''dirty hack for webp images'''
+
+  @tornado.gen.coroutine
+  def get(self, path, include_body=True):
+    self.path = self.parse_url_path(path)
+    absolute_path = self.get_absolute_path(self.root, self.path)
+    self.absolute_path = self.validate_absolute_path(self.root, absolute_path)
+    if self.absolute_path is None:
+      return
+
+    content_type = self.get_content_type()
+    headers = self.request.headers
+    if self.absolute_path.endswith('.png') or self.request.method != 'GET' \
+       or content_type != 'image/webp':
+      yield super().get(path, include_body=include_body)
+      return
+
+    self.set_header('Vary', 'User-Agent, Accept')
+    if 'image/webp' in headers.get('Accept', '').lower() \
+       or 'Gecko' not in headers.get('User-Agent', ''):
+      yield super().get(path, include_body=include_body)
+      return
+
+    png_path = self.absolute_path + '.png'
+    if not os.path.exists(png_path):
+      yield convert_webp(self.absolute_path, png_path)
+
+    path += '.png'
+    yield super().get(path, include_body=include_body)
+
 def main():
   import tornado.httpserver
   from tornado.options import define, options
@@ -165,7 +205,7 @@ def main():
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
-    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", tornado.web.StaticFileHandler, {
+    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", MyStaticFileHandler, {
       'path': options.datadir,
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
@@ -185,7 +225,7 @@ def wsgi():
   application = tornado.wsgi.WSGIApplication([
     (PREFIX+r"/", IndexHandler),
     (PREFIX+r"/" + SCRIPT_PATH, ToolHandler),
-    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)", tornado.web.StaticFileHandler, {
+    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)", MyStaticFileHandler, {
       'path': DEFAULT_DATA_DIR,
     }),
   ],
