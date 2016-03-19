@@ -34,12 +34,16 @@ def guess_mime_using_file(path):
   mime = mime.rstrip(';')
   encoding = encoding.split('=')[-1]
 
+  # older file doesn't know webp
   if mime == 'application/octet-stream':
     result = subprocess.check_output(['file', path]).decode()
     _, desc = result.split(None, 1)
     if 'Web/P image' in desc:
-      return 'image/webp', 'binary'
+      return 'image/webp', None
 
+  # Tornado will treat non-gzip encoding as application/octet-stream
+  if encoding != 'gzip':
+    encoding = None
   return mime, encoding
 
 mimetypes.guess_type = guess_mime_using_file
