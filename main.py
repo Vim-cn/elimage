@@ -62,10 +62,10 @@ def guess_extension(ftype):
 
 @tornado.gen.coroutine
 def convert_webp(webp, png):
-  cmd = ['dwebp', '-quiet', webp, '-o', png]
+  cmd = ['dwebp', webp, '-o', png]
   # cmd = ['convert', '-interlace', 'PNG', webp, png]
   logging.info('convert webp to png: %s', webp)
-  p = tornado.process.Subprocess(cmd)
+  p = tornado.process.Subprocess(cmd, stderr=subprocess.DEVNULL)
   yield p.wait_for_exit()
 
 class IndexHandler(tornado.web.RequestHandler):
