@@ -61,13 +61,12 @@ def guess_extension(ftype):
     ext = '.jpg'
   return ext
 
-<<<<<<< HEAD
 def splitext_(path):
     for ext in ['.tar.gz', '.tar.bz2', '.tar.xz']:
         if path.endswith(ext):
             return path[:-len(ext)], path[-len(ext):]
         return splitext(path)
-=======
+
 @tornado.gen.coroutine
 def convert_webp(webp, png):
   cmd = ['dwebp', webp, '-o', png]
@@ -75,7 +74,6 @@ def convert_webp(webp, png):
   logging.info('convert webp to png: %s', webp)
   p = tornado.process.Subprocess(cmd, stderr=subprocess.DEVNULL)
   yield p.wait_for_exit()
->>>>>>> dba576a93a31f5eb5a10e1e7f0e165d383739a58
 
 class IndexHandler(tornado.web.RequestHandler):
   index_template = None
