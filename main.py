@@ -10,6 +10,7 @@ import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
+from os.path import splitext
 
 try:
   from functools import lru_cache
@@ -59,6 +60,12 @@ def guess_extension(ftype):
   if ext in ('.jpe', '.jpeg'):
     ext = '.jpg'
   return ext
+
+def splitext_(path):
+    for ext in ['.tar.gz', '.tar.bz2', '.tar.xz']:
+        if path.endswith(ext):
+            return path[:-len(ext)], path[-len(ext):]
+        return splitext(path)
 
 @tornado.gen.coroutine
 def convert_webp(webp, png):
@@ -124,14 +131,20 @@ class IndexHandler(tornado.web.RequestHandler):
             self.set_status(500)
             continue
 
+        filename = file['filename']
         ftype = mimetypes.guess_type(fpath)[0]
         ext = None
         if ftype:
           ext = guess_extension(ftype)
+
         if ext:
           f += ext
-        ret[file['filename']] = '%s/%s/%s' % (
-          self.request.full_url().rstrip('/'), d, f)
+        else:
+          _, ext = splitext_(filename)
+          f += ext
+
+        ret[filename] = '%s/%s/%s' % (
+                self.request.full_url().rstrip('/'), d, f)
 
     if len(ret) > 1:
       for item in ret.items():
