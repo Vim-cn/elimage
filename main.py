@@ -116,8 +116,8 @@ class IndexHandler(tornado.web.RequestHandler):
           ext = guess_extension(ftype)
         if ext:
           f += ext
-          ret[file['filename']] = '%s/%s/%s' % (
-            self.request.full_url().rstrip('/'), d, f)
+        ret[file['filename']] = '%s/%s/%s' % (
+                self.request.full_url().rstrip('/'), d, f)
 
     if len(ret) > 1:
       for item in ret.items():
