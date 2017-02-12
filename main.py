@@ -163,7 +163,11 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
   '''dirty hack for webp images'''
 
   @tornado.gen.coroutine
-  def get(self, path, include_body=True):
+  def head(self, path, ext):
+    yield self.get(path, ext, include_body=False)
+
+  @tornado.gen.coroutine
+  def get(self, path, ext=None, *, include_body=True):
     self.path = self.parse_url_path(path)
     absolute_path = self.get_absolute_path(self.root, self.path)
     self.absolute_path = self.validate_absolute_path(self.root, absolute_path)
@@ -177,9 +181,11 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
       yield super().get(path, include_body=include_body)
       return
 
+    # webp
     self.set_header('Vary', 'User-Agent, Accept')
-    if 'image/webp' in headers.get('Accept', '').lower() \
-       or 'Gecko' not in headers.get('User-Agent', ''):
+    if ('image/webp' in headers.get('Accept', '').lower() \
+        or 'Gecko' not in headers.get('User-Agent', '') \
+       ) and ext != '.png':
       yield super().get(path, include_body=include_body)
       return
 
@@ -206,7 +212,7 @@ def main():
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
-    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", MyStaticFileHandler, {
+    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(\.\w*)?", MyStaticFileHandler, {
       'path': options.datadir,
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
