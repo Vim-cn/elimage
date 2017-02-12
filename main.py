@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-from config import *
-from models import model
-
 import os
 import sys
 import logging
@@ -10,22 +7,15 @@ import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
-
-try:
-  from functools import lru_cache
-except ImportError:
-  # fallback
-  def lru_cache():
-    def wrapper(func):
-      def wrapper2(path):
-        return func(path)
-      return wrapper2
-    return wrapper
+from functools import lru_cache
 
 import tornado.web
 import tornado.template
 import tornado.gen
 import tornado.process
+
+from config import *
+from models import model
 
 SCRIPT_PATH = 'elimage'
 
@@ -226,25 +216,8 @@ def main():
   http_server.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
 
-def wsgi():
-  import tornado.wsgi
-  global application
-  application = tornado.wsgi.WSGIApplication([
-    (PREFIX+r"/", IndexHandler),
-    (PREFIX+r"/" + SCRIPT_PATH, ToolHandler),
-    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)", MyStaticFileHandler, {
-      'path': DEFAULT_DATA_DIR,
-    }),
-  ],
-    datadir=DEFAULT_DATA_DIR,
-    debug=DEBUG,
-    template_path=os.path.join(os.path.dirname(__file__), "templates"),
-  )
-
 if __name__ == "__main__":
   try:
     main()
   except KeyboardInterrupt:
     pass
-else:
-  wsgi()
