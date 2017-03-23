@@ -187,13 +187,13 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
     headers = self.request.headers
     if self.absolute_path.endswith('.png') or self.request.method != 'GET' \
        or content_type != 'image/webp':
-      yield super().get(path, include_body=include_body)
+      yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
       return
 
     self.set_header('Vary', 'User-Agent, Accept')
     if 'image/webp' in headers.get('Accept', '').lower() \
        or 'Gecko' not in headers.get('User-Agent', ''):
-      yield super().get(path, include_body=include_body)
+      yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
       return
 
     png_path = self.absolute_path + '.png'
@@ -201,7 +201,7 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
       yield convert_webp(self.absolute_path, png_path)
 
     path += '.png'
-    yield super().get(path, include_body=include_body)
+    yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
 
 def main():
   import tornado.httpserver
