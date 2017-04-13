@@ -207,7 +207,7 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
 def signal_handler(signo, frame):
     if os.fork():
       sys.exit()
-    os.execl('/usr/bin/python', '/usr/bin/python', *sys.args)
+    os.execl('/usr/bin/python', '/usr/bin/python', *sys.argv)
 
 def main():
   import tornado.httpserver
@@ -224,6 +224,7 @@ def main():
 
   pidfile = file(PID_FILE, 'w')
   pidfile.write(str(os.getpid()))
+  pidfile.flush()
 
   application = tornado.web.Application([
     (r"/", IndexHandler),
