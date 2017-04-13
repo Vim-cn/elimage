@@ -11,6 +11,7 @@ from collections import OrderedDict
 import mimetypes
 import subprocess
 from os.path import splitext
+import signal
 
 try:
   from functools import lru_cache
@@ -203,6 +204,11 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
     path += '.png'
     yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
 
+def signal_handler(signo, frame):
+    if os.fork():
+      sys.exit()
+    os.execl('/usr/bin/python', '/usr/bin/python', *sys.args)
+
 def main():
   import tornado.httpserver
   from tornado.options import define, options
@@ -234,6 +240,8 @@ def main():
   http_server = tornado.httpserver.HTTPServer(application,
                                               xheaders=XHEADERS)
   http_server.listen(options.port)
+  signal.signal(signal.SIGHUP, signal_handler)
+
   tornado.ioloop.IOLoop.instance().start()
 
 def wsgi():
