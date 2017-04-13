@@ -216,6 +216,9 @@ def main():
     if os.fork():
       sys.exit()
 
+  pidfile = file(PID_FILE, 'w')
+  pidfile.write(str(os.getpid()))
+
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
