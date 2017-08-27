@@ -144,8 +144,11 @@ class IndexHandler(tornado.web.RequestHandler):
           _, ext = splitext_(filename)
           f += ext
 
-        ret[filename] = '%s/%s/%s' % (
-                self.request.full_url().rstrip('/'), d, f)
+        headers = self.request.headers
+        ret[filename] = '%s://%s/%s/%s' % (
+                headers.get('X-Scheme', self.request.protocol),
+                self.request.host,
+                d, f)
 
     if len(ret) > 1:
       for item in ret.items():
@@ -205,8 +208,6 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
     yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
 
 def signal_handler(signo, frame):
-    if os.fork():
-      sys.exit()
     os.execl('/usr/bin/python', '/usr/bin/python', *sys.argv)
 
 def main():
