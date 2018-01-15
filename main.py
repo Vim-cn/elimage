@@ -190,16 +190,29 @@ def main():
   import tornado.httpserver
   from tornado.options import define, options
 
+  from tornado.platform.asyncio import AsyncIOMainLoop
+  import asyncio
+  AsyncIOMainLoop().install()
+
   define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
+  define("cloudflare", default=False, help="check for Cloudflare IPs", type=bool)
 
   tornado.options.parse_command_line()
   if options.fork:
     if os.fork():
       sys.exit()
 
-  application = tornado.web.Application([
+  if options.cloudflare:
+    import cloudflare
+    Application = cloudflare.CfApplication
+    loop = asyncio.get_event_loop()
+    loop.create_task(cloudflare.updater())
+  else:
+    Application = tornado.web.Application
+
+  application = Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
     (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(\.\w*)?", MyStaticFileHandler, {
@@ -217,7 +230,8 @@ def main():
     trusted_downstream=TRUSTED_DOWNSTREAM,
   )
   http_server.listen(options.port)
-  tornado.ioloop.IOLoop.instance().start()
+
+  asyncio.get_event_loop().run_forever()
 
 if __name__ == "__main__":
   try:

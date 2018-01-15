@@ -26,9 +26,9 @@ curl -F 'name=@path/to/image' http://<your_host>/
 
 Requirement
 ===========
-* Python 3.2+
+* Python 3.5+
 * The `file` command
-* [tornado](https://github.com/facebook/tornado).
+* [tornado](https://github.com/facebook/tornado) 3.2+
 
 TODO
 ====
