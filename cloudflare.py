@@ -40,13 +40,11 @@ def install():
   RH.prepare = _my_prepare
 
 def _my_prepare(self):
-  logger.info('entering')
   request = self.request
   cfip = request.headers.get('Cf-Connecting-IP')
   if cfip:
     ip = ipaddress.ip_address(request.remote_ip)
     for net in CLOUDFLARE_IPS:
-      logger.info('checking %s', net)
       if ip in net:
         request.remote_ip = cfip
         request.protocol = request.headers.get('X-Forwarded-Proto', 'http')
