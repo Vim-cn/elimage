@@ -207,13 +207,11 @@ def main():
 
   if options.cloudflare:
     import cloudflare
-    Application = cloudflare.CfApplication
+    cloudflare.install()
     loop = asyncio.get_event_loop()
     loop.create_task(cloudflare.updater())
-  else:
-    Application = tornado.web.Application
 
-  application = Application([
+  application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
     (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(\.\w*)?", MyStaticFileHandler, {
