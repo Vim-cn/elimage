@@ -211,8 +211,11 @@ def main():
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
   )
-  http_server = tornado.httpserver.HTTPServer(application,
-                                              xheaders=XHEADERS)
+  http_server = tornado.httpserver.HTTPServer(
+    application,
+    xheaders=XHEADERS,
+    trusted_downstream=TRUSTED_DOWNSTREAM,
+  )
   http_server.listen(options.port)
   tornado.ioloop.IOLoop.instance().start()
 
