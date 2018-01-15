@@ -195,6 +195,7 @@ def main():
   AsyncIOMainLoop().install()
 
   define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
+  define("address", default='', help="run on the given address", type=str)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
   define("cloudflare", default=False, help="check for Cloudflare IPs", type=bool)
@@ -227,9 +228,8 @@ def main():
   http_server = tornado.httpserver.HTTPServer(
     application,
     xheaders=XHEADERS,
-    trusted_downstream=TRUSTED_DOWNSTREAM,
   )
-  http_server.listen(options.port)
+  http_server.listen(options.port, address=options.address)
 
   asyncio.get_event_loop().run_forever()
 
