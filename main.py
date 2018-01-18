@@ -129,6 +129,7 @@ class IndexHandler(tornado.web.RequestHandler):
     elif ret:
       img_url = tuple(ret.values())[0]
       self.write("%s\n" % img_url)
+    logging.info('%s posted: %s', self.request.remote_ip, ret)
 
 class ToolHandler(tornado.web.RequestHandler):
   def get(self):
