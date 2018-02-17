@@ -32,5 +32,5 @@ TOOLS
 
                                 24 Oct 2012                          elimage(1)
 </pre>
-<script>document.onpaste=function(a){var b=a.clipboardData.items[0];if('file'===b.kind){var c=new FormData(document.getElementsByTagName('form').item(0));c.append('image',b.getAsFile());var d=new XMLHttpRequest;d.open('POST','/',!0),d.onload=function(){200<=this.status&&400>this.status&&(document.open(),document.write(this.response),document.close())},d.send(c)}};</script>
+<script>document.onpaste=function(a){var b=a.clipboardData.items[0];if('file'===b.kind){document.getElementsByName('image')[0].files[0]=b.getAsFile();document.getElementsByTagName('form')[0].submit()}};</script>
 <!-- vim: set fdm=marker et sw=4 syntax=html.tornadotmpl: -->
