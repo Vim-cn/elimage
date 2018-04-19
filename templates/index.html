@@ -11,7 +11,7 @@ NAME
 SYNOPSIS
     curl -F 'name=@/path/to/image' {{ url }}
 
-    Or upload via your browser: <form action="/" method="post" enctype="multipart/form-data" style="display: inline;"><input type="file" name="image" width="10" multiple accept="image/*"/>{% if password_required %}<input type="password" name="password" style="width: 20px"/>{% end %}<input type="submit" value="Upload!"/></form>
+    Or upload via your browser: <form action="/" method="post" enctype="multipart/form-data" style="display: inline;"><input type="file" name="image" width="10" multiple accept="image/*"/>{% if password_required %}<input type="password" name="password" style="width: 20px" required/>{% end %}<input type="submit" value="Upload!"/></form>
 
     You can also paste an image here.
 

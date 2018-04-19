@@ -8,6 +8,7 @@ from collections import OrderedDict
 import mimetypes
 import subprocess
 from functools import lru_cache
+from hmac import compare_digest
 
 import tornado.web
 import tornado.template
@@ -93,7 +94,7 @@ class IndexHandler(tornado.web.RequestHandler):
     # Check whether password is required
     expected_password = self.settings['password']
     if expected_password and \
-      self.get_argument('password') != expected_password:
+      not compare_digest(self.get_argument('password'), expected_password):
         raise tornado.web.HTTPError(403, 'You need a valid password to post.')
 
     files = self.request.files
@@ -233,7 +234,7 @@ def main():
     datadir=options.datadir,
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
-    password=UPLOAD_PASSWORD
+    password=UPLOAD_PASSWORD,
   )
   http_server = tornado.httpserver.HTTPServer(
     application,
