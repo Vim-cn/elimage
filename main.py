@@ -73,7 +73,10 @@ class IndexHandler(tornado.web.RequestHandler):
       else:
         self.index_template = tornado.template.Template(
           text, compress_whitespace=False)
-        content = self.index_template.generate(url=self.request.full_url())
+        content = self.index_template.generate(
+          url=self.request.full_url(),
+          password_required=bool(self.settings['password'])
+        )
         self.write(content)
 
   def post(self):
@@ -86,6 +89,12 @@ class IndexHandler(tornado.web.RequestHandler):
         raise tornado.web.HTTPError(403, 'You are on our blacklist.')
       else:
         uid = user['id']
+
+    # Check whether password is required
+    expected_password = self.settings['password']
+    if expected_password and \
+      self.get_argument('password') != expected_password:
+        raise tornado.web.HTTPError(403, 'You need a valid password to post.')
 
     files = self.request.files
     if not files:
@@ -199,7 +208,8 @@ def main():
   define("address", default='', help="run on the given address", type=str)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
-  define("cloudflare", default=False, help="check for Cloudflare IPs", type=bool)
+  define("cloudflare", default=CLOUDFLARE, help="check for Cloudflare IPs", type=bool)
+  define("password", default=UPLOAD_PASSWORD, help="optional password", type=str)
 
   tornado.options.parse_command_line()
   if options.fork:
@@ -223,6 +233,7 @@ def main():
     datadir=options.datadir,
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
+    password=UPLOAD_PASSWORD
   )
   http_server = tornado.httpserver.HTTPServer(
     application,

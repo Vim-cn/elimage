@@ -5,3 +5,5 @@ DB = 'elimage.db'
 
 XHEADERS = True # you may set this to false if not behind another server
 CLOUDFLARE = False
+
+UPLOAD_PASSWORD = ''
