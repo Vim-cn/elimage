@@ -157,10 +157,10 @@ class IndexHandler(tornado.web.RequestHandler):
          file_name = os.path.join(self.settings['template_path'], 'link.html')
          with open(file_name, 'r') as link_file:
            text = link_file.read()
-        except IOError:
-          raise tornado.web.HTTPError(404, 'link.html is missing')
-        else:
-          self.link_template = tornado.template.Template(
+       except IOError:
+         raise tornado.web.HTTPError(404, 'link.html is missing')
+       else:
+         self.link_template = tornado.template.Template(
                   text, compress_whitespace=False)
 
     if len(ret) > 1:
@@ -168,7 +168,7 @@ class IndexHandler(tornado.web.RequestHandler):
         self.write('%s: %s\n' % item)
     elif ret:
       img_url = tuple(ret.values())[0]
-      content = self.index_template.generate(url=img_url)
+      content = self.link_template.generate(url=img_url)
       self.write(content)
 
 class ToolHandler(tornado.web.RequestHandler):
