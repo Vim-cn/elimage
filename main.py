@@ -78,6 +78,8 @@ def convert_webp(webp, png):
 
 class IndexHandler(tornado.web.RequestHandler):
   index_template = None
+  link_template = None
+
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
     if self.index_template is None:
@@ -150,12 +152,24 @@ class IndexHandler(tornado.web.RequestHandler):
                 self.request.host,
                 d, f)
 
+    if self.link_template is None:
+       try:
+         file_name = os.path.join(self.settings['template_path'], 'link.html')
+         with open(file_name, 'r') as link_file:
+           text = link_file.read()
+        except IOError:
+          raise tornado.web.HTTPError(404, 'link.html is missing')
+        else:
+          self.link_template = tornado.template.Template(
+                  text, compress_whitespace=False)
+
     if len(ret) > 1:
       for item in ret.items():
         self.write('%s: %s\n' % item)
     elif ret:
       img_url = tuple(ret.values())[0]
-      self.write("%s\n" % img_url)
+      content = self.index_template.generate(url=img_url)
+      self.write(content)
 
 class ToolHandler(tornado.web.RequestHandler):
   def get(self):
