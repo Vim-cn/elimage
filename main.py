@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 
-from config import *
-from models import model
-
 import os
 import sys
 import logging
@@ -13,21 +10,16 @@ import subprocess
 from os.path import splitext
 import signal
 
-try:
-  from functools import lru_cache
-except ImportError:
-  # fallback
-  def lru_cache():
-    def wrapper(func):
-      def wrapper2(path):
-        return func(path)
-      return wrapper2
-    return wrapper
+from functools import lru_cache
+from hmac import compare_digest
 
 import tornado.web
 import tornado.template
 import tornado.gen
 import tornado.process
+
+from config import *
+from models import model
 
 SCRIPT_PATH = 'elimage'
 
@@ -93,7 +85,10 @@ class IndexHandler(tornado.web.RequestHandler):
       else:
         self.index_template = tornado.template.Template(
           text, compress_whitespace=False)
-        content = self.index_template.generate(url=self.request.full_url())
+        content = self.index_template.generate(
+          url=self.request.full_url(),
+          password_required=bool(self.settings['password'])
+        )
         self.write(content)
 
   def post(self):
@@ -106,6 +101,12 @@ class IndexHandler(tornado.web.RequestHandler):
         raise tornado.web.HTTPError(403, 'You are on our blacklist.')
       else:
         uid = user['id']
+
+    # Check whether password is required
+    expected_password = self.settings['password']
+    if expected_password and \
+      not compare_digest(self.get_argument('password'), expected_password):
+        raise tornado.web.HTTPError(403, 'You need a valid password to post.')
 
     files = self.request.files
     if not files:
@@ -170,6 +171,7 @@ class IndexHandler(tornado.web.RequestHandler):
       img_url = tuple(ret.values())[0]
       content = self.link_template.generate(url=img_url)
       self.write(content)
+    logging.info('%s posted: %s', self.request.remote_ip, ret)
 
 class ToolHandler(tornado.web.RequestHandler):
   def get(self):
@@ -194,7 +196,11 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
   '''dirty hack for webp images'''
 
   @tornado.gen.coroutine
-  def get(self, path, include_body=True):
+  def head(self, path, ext):
+    yield self.get(path, ext, include_body=False)
+
+  @tornado.gen.coroutine
+  def get(self, path, ext=None, *, include_body=True):
     self.path = self.parse_url_path(path)
     absolute_path = self.get_absolute_path(self.root, self.path)
     self.absolute_path = self.validate_absolute_path(self.root, absolute_path)
@@ -208,10 +214,12 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
       yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
       return
 
+    # webp
     self.set_header('Vary', 'User-Agent, Accept')
-    if 'image/webp' in headers.get('Accept', '').lower() \
-       or 'Gecko' not in headers.get('User-Agent', ''):
-      yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
+    if ('image/webp' in headers.get('Accept', '').lower() \
+        or 'Gecko' not in headers.get('User-Agent', '') \
+       ) and ext != '.png':
+      yield super().get(path, include_body=include_body)
       return
 
     png_path = self.absolute_path + '.png'
@@ -228,9 +236,16 @@ def main():
   import tornado.httpserver
   from tornado.options import define, options
 
+  from tornado.platform.asyncio import AsyncIOMainLoop
+  import asyncio
+  AsyncIOMainLoop().install()
+
   define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
+  define("address", default='', help="run on the given address", type=str)
   define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
+  define("cloudflare", default=CLOUDFLARE, help="check for Cloudflare IPs", type=bool)
+  define("password", default=UPLOAD_PASSWORD, help="optional password", type=str)
 
   tornado.options.parse_command_line()
   if options.fork:
@@ -241,10 +256,16 @@ def main():
   pidfile.write(str(os.getpid()))
   pidfile.flush()
 
+  if options.cloudflare:
+    import cloudflare
+    cloudflare.install()
+    loop = asyncio.get_event_loop()
+    loop.create_task(cloudflare.updater())
+
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
-    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", MyStaticFileHandler, {
+    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(\.\w*)?", MyStaticFileHandler, {
       'path': options.datadir,
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
@@ -252,7 +273,9 @@ def main():
     datadir=options.datadir,
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
+    password=UPLOAD_PASSWORD,
   )
+
   http_server = tornado.httpserver.HTTPServer(application,
                                               xheaders=XHEADERS)
   http_server.listen(options.port)
@@ -274,11 +297,12 @@ def wsgi():
     debug=DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
   )
+  http_server.listen(options.port, address=options.address)
+
+  asyncio.get_event_loop().run_forever()
 
 if __name__ == "__main__":
   try:
     main()
   except KeyboardInterrupt:
     pass
-else:
-  wsgi()
