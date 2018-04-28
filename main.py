@@ -7,6 +7,9 @@ import hashlib
 from collections import OrderedDict
 import mimetypes
 import subprocess
+from os.path import splitext
+import signal
+
 from functools import lru_cache
 from hmac import compare_digest
 
@@ -51,6 +54,12 @@ def guess_extension(ftype):
     ext = '.jpg'
   return ext
 
+def splitext_(path):
+    for ext in ['.tar.gz', '.tar.bz2', '.tar.xz']:
+        if path.endswith(ext):
+            return path[:-len(ext)], path[-len(ext):]
+        return splitext(path)
+
 @tornado.gen.coroutine
 def convert_webp(webp, png):
   cmd = ['dwebp', webp, '-o', png]
@@ -61,6 +70,8 @@ def convert_webp(webp, png):
 
 class IndexHandler(tornado.web.RequestHandler):
   index_template = None
+  link_template = None
+
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
     if self.index_template is None:
@@ -124,21 +135,42 @@ class IndexHandler(tornado.web.RequestHandler):
             self.set_status(500)
             continue
 
+        filename = file['filename']
         ftype = mimetypes.guess_type(fpath)[0]
         ext = None
         if ftype:
           ext = guess_extension(ftype)
+
         if ext:
           f += ext
-        ret[file['filename']] = '%s/%s/%s' % (
-          self.request.full_url().rstrip('/'), d, f)
+        else:
+          _, ext = splitext_(filename)
+          f += ext
+
+        headers = self.request.headers
+        ret[filename] = '%s://%s/%s/%s' % (
+                headers.get('X-Scheme', self.request.protocol),
+                self.request.host,
+                d, f)
+
+    if self.link_template is None:
+       try:
+         file_name = os.path.join(self.settings['template_path'], 'link.html')
+         with open(file_name, 'r') as link_file:
+           text = link_file.read()
+       except IOError:
+         raise tornado.web.HTTPError(404, 'link.html is missing')
+       else:
+         self.link_template = tornado.template.Template(
+                  text, compress_whitespace=False)
 
     if len(ret) > 1:
       for item in ret.items():
         self.write('%s: %s\n' % item)
     elif ret:
       img_url = tuple(ret.values())[0]
-      self.write("%s\n" % img_url)
+      content = self.link_template.generate(url=img_url)
+      self.write(content)
     logging.info('%s posted: %s', self.request.remote_ip, ret)
 
 class ToolHandler(tornado.web.RequestHandler):
@@ -179,7 +211,7 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
     headers = self.request.headers
     if self.absolute_path.endswith('.png') or self.request.method != 'GET' \
        or content_type != 'image/webp':
-      yield super().get(path, include_body=include_body)
+      yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
       return
 
     # webp
@@ -195,7 +227,10 @@ class MyStaticFileHandler(tornado.web.StaticFileHandler):
       yield convert_webp(self.absolute_path, png_path)
 
     path += '.png'
-    yield super().get(path, include_body=include_body)
+    yield super(MyStaticFileHandler, self).get(path, include_body=include_body)
+
+def signal_handler(signo, frame):
+    os.execl('/usr/bin/python', '/usr/bin/python', *sys.argv)
 
 def main():
   import tornado.httpserver
@@ -217,6 +252,10 @@ def main():
     if os.fork():
       sys.exit()
 
+  with open(PID_FILE, 'w') as pidfile:
+      pidfile.write(str(os.getpid()))
+      pidfile.flush()
+
   if options.cloudflare:
     import cloudflare
     cloudflare.install()
@@ -236,9 +275,27 @@ def main():
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
     password=UPLOAD_PASSWORD,
   )
-  http_server = tornado.httpserver.HTTPServer(
-    application,
-    xheaders=XHEADERS,
+
+  http_server = tornado.httpserver.HTTPServer(application,
+                                              xheaders=XHEADERS)
+  http_server.listen(options.port)
+  signal.signal(signal.SIGHUP, signal_handler)
+
+  tornado.ioloop.IOLoop.instance().start()
+
+def wsgi():
+  import tornado.wsgi
+  global application
+  application = tornado.wsgi.WSGIApplication([
+    (PREFIX+r"/", IndexHandler),
+    (PREFIX+r"/" + SCRIPT_PATH, ToolHandler),
+    (PREFIX+r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)", MyStaticFileHandler, {
+      'path': DEFAULT_DATA_DIR,
+    }),
+  ],
+    datadir=DEFAULT_DATA_DIR,
+    debug=DEBUG,
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
   )
   http_server.listen(options.port, address=options.address)
 
