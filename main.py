@@ -252,9 +252,9 @@ def main():
     if os.fork():
       sys.exit()
 
-  pidfile = file(PID_FILE, 'w')
-  pidfile.write(str(os.getpid()))
-  pidfile.flush()
+  with open(PID_FILE, 'w') as pidfile:
+      pidfile.write(str(os.getpid()))
+      pidfile.flush()
 
   if options.cloudflare:
     import cloudflare
