@@ -3,7 +3,8 @@ BEGIN TRANSACTION;
 CREATE TABLE user (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     ip VARCHAR(40) NOT NULL,
-    blocked BOOLEAN default 0
+    blocked BOOLEAN default 0,
+    comment text
 );
 
 CREATE TABLE image (
@@ -12,5 +13,7 @@ CREATE TABLE image (
     name VARCHAR(40) NOT NULL,
     time TIMESTAMP
 );
+
+CREATE INDEX idx_name ON image (name);
 
 COMMIT;
