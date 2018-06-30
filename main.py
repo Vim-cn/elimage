@@ -107,7 +107,7 @@ class IndexHandler(tornado.web.RequestHandler):
         m = hashlib.sha1()
         m.update(file['body'])
         h = m.hexdigest()
-        model.add_image(uid, h, file['filename'])
+        model.add_image(uid, h, file['filename'], len(file['body']))
         d = h[:2]
         f = h[2:]
         p = os.path.join(self.settings['datadir'], d)

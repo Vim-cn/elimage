@@ -12,6 +12,7 @@ CREATE TABLE image (
     uid INTEGER NOT NULL REFERENCES "user" ("id"),
     name VARCHAR(40) NOT NULL,
     filename VARCHAR(256) NOT NULL,
+    size INTEGER NOT NULL,
     time TIMESTAMP
 );
 

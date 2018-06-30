@@ -62,10 +62,10 @@ class Model:
     return self.cur.lastrowid
 
   @log
-  def add_image(self, uid, fname, filename):
-    self.cur.execute('''insert into image (uid, name, time, filename)
-                        values (?, ?, ?, ?)''',
-                     (uid, fname, int(time.time()), filename))
+  def add_image(self, uid, fname, filename, size):
+    self.cur.execute('''insert into image (uid, name, time, filename, size)
+                        values (?, ?, ?, ?, ?)''',
+                     (uid, fname, int(time.time()), filename, size))
     self.conn.commit()
 
   @log
