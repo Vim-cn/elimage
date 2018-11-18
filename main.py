@@ -12,10 +12,9 @@ from hmac import compare_digest
 
 import tornado.web
 import tornado.template
-import tornado.gen
 import tornado.process
 
-from config import *
+import config
 from models import model
 
 SCRIPT_PATH = 'elimage'
@@ -50,14 +49,6 @@ def guess_extension(ftype):
   if ext in ('.jpe', '.jpeg'):
     ext = '.jpg'
   return ext
-
-@tornado.gen.coroutine
-def convert_webp(webp, png):
-  cmd = ['dwebp', webp, '-o', png]
-  # cmd = ['convert', '-interlace', 'PNG', webp, png]
-  logging.info('convert webp to png: %s', webp)
-  p = tornado.process.Subprocess(cmd, stderr=subprocess.DEVNULL)
-  yield p.wait_for_exit()
 
 class IndexHandler(tornado.web.RequestHandler):
   index_template = None
@@ -160,43 +151,6 @@ class HashHandler(tornado.web.RequestHandler):
     else:
       self.redirect('/%s/%s%s' % (h[:2], h[2:], ext), permanent=True)
 
-class MyStaticFileHandler(tornado.web.StaticFileHandler):
-  '''dirty hack for webp images'''
-
-  @tornado.gen.coroutine
-  def head(self, path, ext):
-    yield self.get(path, ext, include_body=False)
-
-  @tornado.gen.coroutine
-  def get(self, path, ext=None, *, include_body=True):
-    self.path = self.parse_url_path(path)
-    absolute_path = self.get_absolute_path(self.root, self.path)
-    self.absolute_path = self.validate_absolute_path(self.root, absolute_path)
-    if self.absolute_path is None:
-      return
-
-    content_type = self.get_content_type()
-    headers = self.request.headers
-    if self.absolute_path.endswith('.png') or self.request.method != 'GET' \
-       or content_type != 'image/webp':
-      yield super().get(path, include_body=include_body)
-      return
-
-    # webp
-    self.set_header('Vary', 'User-Agent, Accept')
-    if ('image/webp' in headers.get('Accept', '').lower() \
-        or 'Gecko' not in headers.get('User-Agent', '') \
-       ) and ext != '.png':
-      yield super().get(path, include_body=include_body)
-      return
-
-    png_path = self.absolute_path + '.png'
-    if not os.path.exists(png_path):
-      yield convert_webp(self.absolute_path, png_path)
-
-    path += '.png'
-    yield super().get(path, include_body=include_body)
-
 def main():
   import tornado.httpserver
   from tornado.options import define, options
@@ -205,12 +159,12 @@ def main():
   import asyncio
   AsyncIOMainLoop().install()
 
-  define("port", default=DEFAULT_PORT, help="run on the given port", type=int)
+  define("port", default=config.DEFAULT_PORT, help="run on the given port", type=int)
   define("address", default='', help="run on the given address", type=str)
-  define("datadir", default=DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
+  define("datadir", default=config.DEFAULT_DATA_DIR, help="the directory to put uploaded data", type=str)
   define("fork", default=False, help="fork after startup", type=bool)
-  define("cloudflare", default=CLOUDFLARE, help="check for Cloudflare IPs", type=bool)
-  define("password", default=UPLOAD_PASSWORD, help="optional password", type=str)
+  define("cloudflare", default=config.CLOUDFLARE, help="check for Cloudflare IPs", type=bool)
+  define("password", default=config.UPLOAD_PASSWORD, help="optional password", type=str)
 
   tornado.options.parse_command_line()
   if options.fork:
@@ -226,19 +180,19 @@ def main():
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
-    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(\.\w*)?", MyStaticFileHandler, {
+    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(\.\w*)?", tornado.web.StaticFileHandler, {
       'path': options.datadir,
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
   ],
     datadir=options.datadir,
-    debug=DEBUG,
+    debug=config.DEBUG,
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
-    password=UPLOAD_PASSWORD,
+    password=config.UPLOAD_PASSWORD,
   )
   http_server = tornado.httpserver.HTTPServer(
     application,
-    xheaders=XHEADERS,
+    xheaders=config.XHEADERS,
   )
   http_server.listen(options.port, address=options.address)
 
