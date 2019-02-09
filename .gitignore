@@ -3,3 +3,4 @@ elimage.db
 *.bak
 .*.swp
 __pycache__/
+templates/index-site.html

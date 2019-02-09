@@ -9,6 +9,7 @@ import mimetypes
 import subprocess
 from functools import lru_cache
 from hmac import compare_digest
+from pathlib import Path
 
 import tornado.web
 import tornado.template
@@ -55,21 +56,28 @@ class IndexHandler(tornado.web.RequestHandler):
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
     if self.index_template is None:
+      template_path = Path(self.settings['template_path'])
       try:
-        file_name = os.path.join(self.settings['template_path'], 'index.html')
-        with open(file_name, 'r') as index_file:
-          text = index_file.read()
+        file_name = template_path / 'index-site.html'
+        try:
+          with open(file_name) as index_file:
+            text = index_file.read()
+        except FileNotFoundError:
+          file_name = template_path / 'index.html'
+          with open(file_name) as index_file:
+            text = index_file.read()
+
+        self.__class__.index_template = tornado.template.Template(
+          text, compress_whitespace=False)
       except IOError:
         logging.exception('failed to open the file: %s', file_name)
         raise tornado.web.HTTPError(404, 'index.html is missing')
-      else:
-        self.index_template = tornado.template.Template(
-          text, compress_whitespace=False)
-        content = self.index_template.generate(
-          url=self.request.full_url(),
-          password_required=bool(self.settings['password'])
-        )
-        self.write(content)
+
+    content = self.index_template.generate(
+      url=self.request.full_url(),
+      password_required=bool(self.settings['password'])
+    )
+    self.write(content)
 
   def post(self):
     # Check the user has been blocked or not
