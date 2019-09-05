@@ -29,7 +29,3 @@ Requirement
 * Python 3.5+
 * The `file` command
 * [tornado](https://github.com/facebook/tornado) 3.2+
-
-TODO
-====
-* record the original image filename
