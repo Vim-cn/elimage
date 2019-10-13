@@ -29,3 +29,4 @@ Requirement
 * Python 3.5+
 * The `file` command
 * [tornado](https://github.com/facebook/tornado) 3.2+
+* The `qrencode` command if you want support for QR-code output

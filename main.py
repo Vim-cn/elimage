@@ -39,6 +39,10 @@ def guess_mime_using_file(path):
     encoding = None
   return mime, encoding
 
+def qrencode(s):
+  return subprocess.check_output(
+    ['qrencode', '-t', 'UTF8', s]).decode()
+
 mimetypes.guess_type = guess_mime_using_file
 
 def guess_extension(ftype):
@@ -132,12 +136,17 @@ class IndexHandler(tornado.web.RequestHandler):
         ret[file['filename']] = '%s/%s/%s' % (
           self.request.full_url().rstrip('/'), d, f)
 
+    output_qr = self.get_argument('qr', None) is not None
     if len(ret) > 1:
       for item in ret.items():
         self.write('%s: %s\n' % item)
+        if output_qr:
+          self.write('%s\n' % qrencode(item[1]))
     elif ret:
       img_url = tuple(ret.values())[0]
       self.write("%s\n" % img_url)
+      if output_qr:
+        self.write('%s\n' % qrencode(img_url))
     logging.info('%s posted: %s', self.request.remote_ip, ret)
 
 class ToolHandler(tornado.web.RequestHandler):
