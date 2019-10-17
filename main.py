@@ -105,6 +105,11 @@ class IndexHandler(tornado.web.RequestHandler):
       raise tornado.web.HTTPError(400, 'upload your image please')
 
     ret = OrderedDict()
+    url_prefix = self.request.full_url()
+    if '?' in url_prefix:
+      url_prefix = url_prefix.split('?', 1)[0]
+    url_prefix = url_prefix.rstrip('/')
+
     for filelist in files.values():
       for file in filelist:
         m = hashlib.sha1()
@@ -133,8 +138,7 @@ class IndexHandler(tornado.web.RequestHandler):
           ext = guess_extension(ftype)
         if ext:
           f += ext
-        ret[file['filename']] = '%s/%s/%s' % (
-          self.request.full_url().rstrip('/'), d, f)
+        ret[file['filename']] = '%s/%s/%s' % (url_prefix, d, f)
 
     output_qr = self.get_argument('qr', None) is not None
     if len(ret) > 1:
