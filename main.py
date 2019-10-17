@@ -144,9 +144,13 @@ class IndexHandler(tornado.web.RequestHandler):
           self.write('%s\n' % qrencode(item[1]))
     elif ret:
       img_url = tuple(ret.values())[0]
-      self.write("%s\n" % img_url)
       if output_qr:
-        self.write('%s\n' % qrencode(img_url))
+        img_url_arr = img_url.split('/?qr',1)
+        img_url_new = ''.join(img_url_arr)
+        self.write('%s\n' % qrencode(img_url_new))
+        self.write("%s\n" % img_url_new)
+      else:
+        self.write("%s\n" % img_url)
     logging.info('%s posted: %s', self.request.remote_ip, ret)
 
 class ToolHandler(tornado.web.RequestHandler):
