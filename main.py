@@ -77,8 +77,12 @@ class IndexHandler(tornado.web.RequestHandler):
         logging.exception('failed to open the file: %s', file_name)
         raise tornado.web.HTTPError(404, 'index.html is missing')
 
+    url_prefix = self.request.full_url()
+    if '?' in url_prefix:
+      url_prefix = url_prefix.split('?', 1)[0]
+
     content = self.index_template.generate(
-      url=self.request.full_url(),
+      url=url_prefix,
       password_required=bool(self.settings['password'])
     )
     self.write(content)
