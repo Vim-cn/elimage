@@ -17,19 +17,32 @@ import tornado.process
 
 import config
 from models import model
+try:
+  from checker import check_executable
+except ImportError:
+  async def check_executable(
+    ip: str, sha1: str, content: bytes, filename: str,
+  ) -> None:
+    pass
 
 SCRIPT_PATH = 'elimage'
 
 @lru_cache()
-def guess_mime_using_file(path):
-  result = subprocess.check_output(['file', '-i', path]).decode()
+def guess_mime_using_file(content):
+  result = subprocess.check_output(
+    ['file', '-i', '-'],
+    input = content,
+  ).decode()
   _, mime, encoding = result.split()
   mime = mime.rstrip(';')
   encoding = encoding.split('=')[-1]
 
   # older file doesn't know webp
   if mime == 'application/octet-stream':
-    result = subprocess.check_output(['file', path]).decode()
+    result = subprocess.check_output(
+      ['file', '-'],
+      input = content,
+    ).decode()
     _, desc = result.split(None, 1)
     if 'Web/P image' in desc:
       return 'image/webp', None
@@ -42,8 +55,6 @@ def guess_mime_using_file(path):
 def qrencode(s):
   return subprocess.check_output(
     ['qrencode', '-t', 'UTF8', s]).decode()
-
-mimetypes.guess_type = guess_mime_using_file
 
 def guess_extension(ftype):
   if ftype == 'application/octet-stream':
@@ -87,7 +98,7 @@ class IndexHandler(tornado.web.RequestHandler):
     )
     self.write(content)
 
-  def post(self):
+  async def post(self):
     # Check the user has been blocked or not
     user = model.get_user_by_ip(self.request.remote_ip)
     if user is None:
@@ -120,6 +131,12 @@ class IndexHandler(tornado.web.RequestHandler):
         m.update(file['body'])
         h = m.hexdigest()
         model.add_image(uid, h, file['filename'], len(file['body']))
+        ftype = guess_mime_using_file(file['body'])[0]
+        if ftype == 'application/x-dosexec':
+          await check_executable(
+            self.request.remote_ip,
+            h, file['body'], file['filename'])
+
         d = h[:2]
         f = h[2:]
         p = os.path.join(self.settings['datadir'], d)
@@ -136,7 +153,6 @@ class IndexHandler(tornado.web.RequestHandler):
             self.set_status(500)
             continue
 
-        ftype = mimetypes.guess_type(fpath)[0]
         ext = None
         if ftype:
           ext = guess_extension(ftype)

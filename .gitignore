@@ -4,3 +4,4 @@ elimage.db
 .*.swp
 __pycache__/
 templates/index-site.html
+checker.py
