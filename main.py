@@ -26,6 +26,10 @@ except ImportError:
     pass
 
 SCRIPT_PATH = 'elimage'
+RISKY_TYPES = [
+  'application/x-dosexec',
+  'application/x-executable',
+]
 
 @lru_cache()
 def guess_mime_using_file(content):
@@ -132,7 +136,7 @@ class IndexHandler(tornado.web.RequestHandler):
         h = m.hexdigest()
         model.add_image(uid, h, file['filename'], len(file['body']))
         ftype = guess_mime_using_file(file['body'])[0]
-        if ftype == 'application/x-dosexec':
+        if ftype in RISKY_TYPES:
           await check_executable(
             self.request.remote_ip,
             h, file['body'], file['filename'])
