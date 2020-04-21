@@ -32,6 +32,11 @@ RISKY_TYPES = [
 ]
 
 @lru_cache()
+def guess_mime_using_file_p(path):
+  with open(path, 'rb') as f:
+    data = f.read()
+  return guess_mime_using_file(data)
+
 def guess_mime_using_file(content):
   result = subprocess.check_output(
     ['file', '-i', '-'],
@@ -59,6 +64,9 @@ def guess_mime_using_file(content):
 def qrencode(s):
   return subprocess.check_output(
     ['qrencode', '-t', 'UTF8', s]).decode()
+
+# for StaticFileHandler
+mimetypes.guess_type = guess_mime_using_file_p
 
 def guess_extension(ftype):
   if ftype == 'application/octet-stream':
