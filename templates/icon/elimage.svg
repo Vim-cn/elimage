@@ -1,50 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="70mm"
-   height="40mm"
-   viewBox="0 0 70 40"
-   version="1.1"
    id="svg8"
-   inkscape:version="0.92.1 r15371"
-   sodipodi:docname="elimage.svg">
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="131.46785"
-     inkscape:cy="54.068848"
-     inkscape:document-units="mm"
-     inkscape:current-layer="layer5"
-     showgrid="false"
-     inkscape:snap-intersection-paths="true"
-     showguides="true">
-    <inkscape:grid
-       type="xygrid"
-       id="grid4621" />
-  </sodipodi:namedview>
+   version="1.1"
+   viewBox="0 0 70 40"
+   height="40mm"
+   width="70mm">
   <defs
-     id="defs2">
-    <inkscape:perspective
-       sodipodi:type="inkscape:persp3d"
-       inkscape:vp_x="-101.67559 : 212.75594 : 1"
-       inkscape:vp_y="0 : 999.99994 : 0"
-       inkscape:vp_z="210 : 148.49999 : 1"
-       inkscape:persp3d-origin="105 : 98.999994 : 1"
-       id="perspective4575" />
-  </defs>
+     id="defs2" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -58,117 +25,89 @@
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:groupmode="layer"
-     id="layer4"
-     inkscape:label="Layer 4"
+     transform="translate(0,-257)"
      style="display:inline"
-     transform="translate(0,-257)">
+     id="layer4">
     <path
-       sodipodi:type="star"
-       style="opacity:0.31499999;fill:#cd5c5c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.63728827;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="path4591"
-       sodipodi:sides="6"
-       sodipodi:cx="57.337219"
-       sodipodi:cy="25.077229"
-       sodipodi:r1="14.029399"
-       sodipodi:r2="28.014935"
-       sodipodi:arg1="-1.0473963"
-       sodipodi:arg2="-0.52379748"
-       inkscape:flatsided="true"
-       inkscape:rounded="0"
-       inkscape:randomized="0"
+       transform="matrix(1.202951,0.70827142,-0.70827142,1.202951,-17.558355,206.28355)"
        d="m 64.349504,12.926019 7.017114,12.148421 -7.012285,12.15121 -14.029398,0.0028 -7.017114,-12.148421 7.012284,-12.15121 z"
-       transform="matrix(1.202951,0.70827142,-0.70827142,1.202951,-17.558355,206.28355)" />
+       id="path4591"
+       style="opacity:0.31499999;fill:#cd5c5c;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.63728827;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
   </g>
   <g
-     inkscape:groupmode="layer"
-     id="layer5"
-     inkscape:label="Layer 5"
-     transform="translate(0,-257)">
+     transform="translate(0,-257)"
+     id="layer5">
     <path
-       style="opacity:0.26400003;fill:#cd5c5c;fill-opacity:1;stroke:none;stroke-width:0.47822124px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 50.695823,267.40984 -0.163141,19.58398 -17.041793,9.65069 0.163141,-19.58397 17.041793,-9.6507"
        id="path4619"
-       inkscape:connector-curvature="0" />
+       d="m 50.695823,267.40984 -0.163141,19.58398 -17.041793,9.65069 0.163141,-19.58397 17.041793,-9.6507"
+       style="opacity:0.26400003;fill:#cd5c5c;fill-opacity:1;stroke:none;stroke-width:0.47822124px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
   </g>
   <g
-     id="layer1"
-     inkscape:groupmode="layer"
-     inkscape:label="Layer 1"
-     transform="translate(0,-257)">
+     style="display:inline"
+     transform="translate(0,-257)"
+     id="layer1">
     <flowRoot
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;writing-mode:tb-rl;fill:#000000;fill-opacity:1;stroke:none"
+       xml:space="preserve"
        id="flowRoot4485"
-       xml:space="preserve"><flowRegion
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;writing-mode:tb-rl;fill:#000000;fill-opacity:1;stroke:none"><flowRegion
          id="flowRegion4487"><rect
-           y="52.519684"
-           x="24.285715"
-           height="158.57143"
+           id="rect4489"
            width="174.28572"
-           id="rect4489" /></flowRegion><flowPara
-         id="flowPara4491" /></flowRoot>    <text
+           height="158.57143"
+           x="24.285715"
+           y="52.519684" /></flowRegion><flowPara
+         id="flowPara4491" /></flowRoot>    <g
        id="text4495"
-       y="284.55664"
-       x="15.997074"
        style="font-style:normal;font-weight:normal;font-size:19.12884903px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.47822124"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'宋体';-inkscape-font-specification:'宋体';writing-mode:lr-tb;stroke-width:0.47822124"
-         y="284.55664"
-         x="15.997074"
-         id="tspan4493"
-         sodipodi:role="line"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽微米黑';-inkscape-font-specification:'文泉驿等宽微米黑';stroke-width:0.47822124"
-           id="tspan4515">I</tspan><tspan
-           id="tspan4507"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽正黑';-inkscape-font-specification:'文泉驿等宽正黑';stroke-width:0.47822124">M<tspan
-   id="tspan4511"
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽微米黑';-inkscape-font-specification:'文泉驿等宽微米黑';stroke-width:0.47822124">A</tspan>G</tspan><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽微米黑';-inkscape-font-specification:'文泉驿等宽微米黑';stroke-width:0.47822124"
-           id="tspan4517">E</tspan></tspan></text>
+       aria-label="IMAGE">
+      <path
+         id="path4509"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽微米黑';-inkscape-font-specification:'文泉驿等宽微米黑';stroke-width:0.47822124"
+         d="m 25.346673,284.55664 h -7.248041 v -1.14885 l 2.755376,-0.18681 v -10.98414 l -2.755376,-0.18681 v -1.14885 h 7.248041 v 1.14885 l -2.746036,0.18681 v 10.98414 l 2.746036,0.18681 z" />
+      <path
+         id="path4511"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽正黑';-inkscape-font-specification:'文泉驿等宽正黑';stroke-width:0.47822124"
+         d="m 34.696271,273.89007 h -0.03736 l -1.681246,6.50082 h -1.531803 l -1.681246,-6.50082 h -0.03736 v 10.33032 h -1.494442 v -13.97303 h 1.755969 l 2.279023,8.61172 h 0.03736 l 2.279023,-8.61172 h 1.681247 v 13.97303 h -1.569164 z" />
+      <path
+         id="path4513"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽微米黑';-inkscape-font-specification:'文泉驿等宽微米黑';stroke-width:0.47822124"
+         d="m 46.408955,284.55664 -1.344997,-4.23114 h -4.586067 l -1.363678,4.23114 h -1.774649 l 4.511345,-13.7115 h 1.82135 l 4.530026,13.7115 z m -1.840031,-5.77228 -1.242254,-3.96027 q -0.36427,-1.15819 -0.579096,-2.1109 -0.186805,0.92469 -0.429652,1.70927 l -1.344997,4.3619 z" />
+      <path
+         id="path4515"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽正黑';-inkscape-font-specification:'文泉驿等宽正黑';stroke-width:0.47822124"
+         d="m 55.581087,282.59519 v -5.26791 h -2.970202 v -1.345 h 4.502004 v 7.65902 q -1.531802,0.7659 -3.25041,0.7659 -2.260342,0 -3.437215,-1.69993 -1.158192,-1.69993 -1.158192,-5.47339 0,-3.75479 1.214234,-5.45471 1.214233,-1.71861 3.661381,-1.71861 1.120831,0 2.484509,0.46701 v 1.47576 q -1.251595,-0.56041 -2.484509,-0.56041 -1.662566,0 -2.52187,1.38236 -0.859303,1.36367 -0.859303,4.4086 0,5.79096 3.194368,5.79096 0.859304,0 1.625205,-0.42965 z" />
+      <path
+         id="path4517"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'文泉驿等宽微米黑';-inkscape-font-specification:'文泉驿等宽微米黑';stroke-width:0.47822124"
+         d="m 67.956931,284.55664 h -7.864497 v -13.65546 h 7.864497 v 1.53181 h -6.127209 v 4.22179 h 5.762939 v 1.51312 h -5.762939 v 4.85694 h 6.127209 z" />
+    </g>
   </g>
   <g
-     inkscape:label="Layer 2"
-     id="layer2"
-     inkscape:groupmode="layer"
-     transform="translate(0,-257)">
-    <text
+     style="display:inline"
+     transform="translate(0,-257)"
+     id="layer2">
+    <g
        id="text4522"
-       y="284.88116"
-       x="9.2934322"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.40410805px;line-height:1.25;font-family:'宋体';-inkscape-font-specification:'宋体';letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.47822124"
-       xml:space="preserve"><tspan
+       aria-label="L">
+      <path
+         id="path4520"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'宋体';-inkscape-font-specification:'宋体';writing-mode:lr-tb;stroke-width:0.47822124"
-         y="284.88116"
-         x="9.2934322"
-         id="tspan4520"
-         sodipodi:role="line">L</tspan></text>
+         d="m 12.481574,283.4465 q 0,0.31881 0.159407,0.47822 0.239111,0.15941 0.557925,0.15941 h 2.151996 q 1.115849,0 1.912885,-0.63763 0.797035,-0.71733 1.195553,-2.152 l 0.398518,0.15941 -0.717332,3.10844 H 9.9310606 v -0.47822 h 0.5579244 q 0.398518,0 0.557925,-0.15941 0.159407,-0.15941 0.159407,-0.47822 v -11.39761 q 0,-0.31881 -0.159407,-0.47822 -0.159407,-0.1594 -0.557925,-0.1594 h -0.478221 v -0.47823 h 3.746067 v 0.47823 h -0.557925 q -0.318814,0 -0.557925,0.1594 -0.159407,0.15941 -0.159407,0.47822 z" />
+    </g>
   </g>
   <g
-     inkscape:label="Layer 3"
-     id="layer3"
-     inkscape:groupmode="layer"
-     transform="translate(0,-257)">
-    <text
-       id="text4527"
-       y="284.88116"
-       x="1.2447902"
-       style="font-style:normal;font-weight:normal;font-size:20.40410805px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.47822124"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'宋体';-inkscape-font-specification:'宋体';writing-mode:lr-tb;stroke-width:0.47822124"
-         y="284.88116"
-         x="1.2447902"
-         id="tspan4525"
-         sodipodi:role="line">E</tspan></text>
-    <text
+     style="display:inline"
+     transform="translate(0,-257)"
+     id="layer3">
+    <g
        id="text4550"
-       y="284.88116"
-       x="1.2447902"
        style="font-style:normal;font-weight:normal;font-size:20.40410805px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.47822124"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'宋体';-inkscape-font-specification:'宋体';writing-mode:lr-tb;stroke-width:0.47822124"
-         y="284.88116"
-         x="1.2447902"
-         id="tspan4548"
-         sodipodi:role="line">E</tspan></text>
+       aria-label="E">
+      <path
+         id="path4523"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'宋体';-inkscape-font-specification:'宋体';writing-mode:lr-tb;fill:#000000;fill-opacity:1;stroke-width:0.47822124"
+         d="m 1.8824186,271.41127 v -0.47823 h 7.8109476 l 0.8767388,2.70992 -0.398518,0.15941 q -0.6376279,-1.19555 -1.3549598,-1.75348 -0.717332,-0.63762 -1.594071,-0.63762 H 4.9908569 q -0.3188142,0 -0.5579248,0.1594 -0.1594071,0.15941 -0.1594071,0.47822 v 4.94162 h 2.3114028 q 0.7970355,0 1.1158497,-0.39851 0.3985177,-0.39852 0.3985177,-1.19556 v -0.47822 h 0.4782213 v 4.70251 H 8.0992952 v -0.31881 q 0,-0.87674 -0.3985177,-1.35496 -0.3188142,-0.47823 -1.1158497,-0.47823 H 4.273525 v 5.97777 q 0,0.31881 0.1594071,0.47822 0.2391106,0.15941 0.5579248,0.15941 h 2.0722922 q 1.1955532,0 1.9925887,-0.63763 0.876739,-0.71733 1.3549602,-2.152 l 0.398518,0.15941 -0.8767392,3.10844 H 1.802715 v -0.47822 h 0.4782213 q 0.3985177,0 0.5579248,-0.15941 0.1594071,-0.15941 0.1594071,-0.47822 v -11.39761 q 0,-0.31881 -0.1594071,-0.47822 -0.1594071,-0.1594 -0.5579248,-0.1594 z" />
+    </g>
   </g>
 </svg>
