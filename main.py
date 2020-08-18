@@ -39,7 +39,7 @@ def guess_mime_using_file_p(path):
 
 def guess_mime_using_file(content):
   result = subprocess.check_output(
-    ['file', '-i', '-'],
+    ['file', '--mime', '-'],
     input = content,
   ).decode()
   _, mime, encoding = result.split()
