@@ -29,6 +29,7 @@ SCRIPT_PATH = 'elimage'
 RISKY_TYPES = [
   'application/x-dosexec',
   'application/x-executable',
+  'application/x-pie-executable',
 ]
 
 @lru_cache()
