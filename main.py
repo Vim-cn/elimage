@@ -216,6 +216,21 @@ BOTS = [
 ]
 
 class FileHandler(tornado.web.StaticFileHandler):
+  def set_extra_headers(self, path):
+    self.set_header("Cache-Control", "public, max-age=" + str(86400 * 365))
+
+  async def get(self, path, include_body=True):
+    try:
+      await super().get(path, include_body)
+    except tornado.web.HTTPError as e:
+      if e.status_code == 404:
+        self.set_status(404)
+        self.set_header("Cache-Control", "public, max-age=86400")
+        self.set_header("Content-Type", "text/plain")
+        self.finish('404 Not Found\n')
+      else:
+        raise
+
   def get_content(self, abspath: str, start = None, end = None):
     ua = self.request.headers['User-Agent']
     if any(bot in ua for bot in BOTS):
