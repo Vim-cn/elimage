@@ -79,6 +79,10 @@ def guess_extension(ftype):
     ext = '.jpg'
   return ext
 
+def open_noatime(file, mode='r'):
+  fd = os.open(file, os.O_RDONLY | os.O_NOATIME)
+  return os.fdopen(fd, mode)
+
 class IndexHandler(tornado.web.RequestHandler):
   index_template = None
   def get(self):
@@ -205,6 +209,44 @@ class HashHandler(tornado.web.RequestHandler):
     else:
       self.redirect('/%s/%s%s' % (h[:2], h[2:], ext), permanent=True)
 
+BOTS = [
+  'Discordbot', 'TelegramBot', 'YandexImages', 'bingbot', 'Googlebot',
+  'PetalBot', 'Pinterestbot', 'DotBot', 'MJ12bot', 'AhrefsBot',
+  'aranhabot', 'DuckDuckBot', 'SeznamBot',
+]
+
+class FileHandler(tornado.web.StaticFileHandler):
+  def get_content(self, abspath: str, start = None, end = None):
+    ua = self.request.headers['User-Agent']
+    if any(bot in ua for bot in BOTS):
+      opener = open_noatime
+    else:
+      opener = open
+
+    with opener(abspath, "rb") as file:
+      if start is not None:
+        file.seek(start)
+      if end is not None:
+        remaining = end - (start or 0)
+      else:
+        remaining = None
+      while True:
+        chunk_size = 64 * 1024
+        if remaining is not None and remaining < chunk_size:
+          chunk_size = remaining
+        chunk = file.read(chunk_size)
+        if chunk:
+          if remaining is not None:
+            remaining -= len(chunk)
+          yield chunk
+        else:
+          if remaining is not None:
+            assert remaining == 0
+          return
+
+  def compute_etag(self):
+    return None
+
 def main():
   import tornado.httpserver
   from tornado.options import define, options
@@ -234,7 +276,7 @@ def main():
   application = tornado.web.Application([
     (r"/", IndexHandler),
     (r"/" + SCRIPT_PATH, ToolHandler),
-    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", tornado.web.StaticFileHandler, {
+    (r"/([a-fA-F0-9]{2}/[a-fA-F0-9]{38})(?:\.\w*)?", FileHandler, {
       'path': options.datadir,
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
