@@ -255,7 +255,11 @@ class FileHandler(tornado.web.StaticFileHandler, BaseHandler):
         raise
 
   def get_content(self, abspath: str, start = None, end = None):
-    ua = self.request.headers['User-Agent']
+    try:
+      ua = self.request.headers['User-Agent']
+    except KeyError:
+      raise tornado.web.HTTPError(500, "KeyError: 'User-Agent'")
+
     if any(bot in ua for bot in BOTS):
       opener = open_noatime
     else:
