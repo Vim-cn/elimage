@@ -83,7 +83,98 @@ def open_noatime(file, mode='r'):
   fd = os.open(file, os.O_RDONLY | os.O_NOATIME)
   return os.fdopen(fd, mode)
 
-class IndexHandler(tornado.web.RequestHandler):
+class BaseHandler(tornado.web.RequestHandler):
+  async def _process_upload(self, method):
+    # Check the user has been blocked or not
+    user = model.get_user_by_ip(self.request.remote_ip)
+    if user is None:
+      uid = model.add_user(self.request.remote_ip)
+    else:
+      if user['blocked']:
+        raise tornado.web.HTTPError(403, 'You are on our blacklist.')
+      else:
+        uid = user['id']
+
+    # Check whether password is required
+    expected_password = self.settings['password']
+    if expected_password and \
+      not compare_digest(self.get_argument('password'), expected_password):
+        raise tornado.web.HTTPError(403, 'You need a valid password to post.')
+
+    if method == 'POST':
+      files = self.request.files
+      if not files:
+        raise tornado.web.HTTPError(400, 'upload your image please')
+      filelist = [f for fs in files.values() for f in fs]
+    elif method == 'PUT':
+      filelist = [{
+        'body': self.request.body,
+        'filename': self.request.path,
+      }]
+    else:
+      raise tornado.web.HTTPError(405)
+
+    ret = OrderedDict()
+    if method == 'PUT':
+      # assume we are at / because we can't tell otherwise
+      url_prefix = self.request.protocol + '://' + self.request.host
+    else:
+      url_prefix = self.request.full_url()
+      if '?' in url_prefix:
+        url_prefix = url_prefix.split('?', 1)[0]
+      url_prefix = url_prefix.rstrip('/')
+
+    for file in filelist:
+      m = hashlib.sha1()
+      m.update(file['body'])
+      h = m.hexdigest()
+      model.add_image(uid, h, file['filename'], len(file['body']))
+      ftype = guess_mime_using_file(file['body'])[0]
+      if ftype in RISKY_TYPES:
+        await check_executable(
+          self.request.remote_ip,
+          h, file['body'], file['filename'])
+
+      d = h[:2]
+      f = h[2:]
+      p = os.path.join(self.settings['datadir'], d)
+      if not os.path.exists(p):
+        os.mkdir(p, 0o750)
+      fpath = os.path.join(p, f)
+      if not os.path.exists(fpath):
+        try:
+          with open(fpath, 'wb') as img_file:
+            img_file.write(file['body'])
+        except IOError:
+          logging.exception('failed to open the file: %s', fpath)
+          ret[file['filename']] = 'FAIL'
+          self.set_status(500)
+          continue
+
+      ext = None
+      if ftype:
+        ext = guess_extension(ftype)
+      if ext:
+        f += ext
+      ret[file['filename']] = '%s/%s/%s' % (url_prefix, d, f)
+
+    output_qr = self.get_argument('qr', None) is not None
+    if len(ret) > 1:
+      for item in ret.items():
+        self.write('%s: %s\n' % item)
+        if output_qr:
+          self.write('%s\n' % qrencode(item[1]))
+    elif ret:
+      img_url = tuple(ret.values())[0]
+      self.write("%s\n" % img_url)
+      if output_qr:
+        self.write('%s\n' % qrencode(img_url))
+    logging.info('%s posted: %s', self.request.remote_ip, ret)
+
+  async def put(self, *args, **kwargs):
+    return await self._process_upload(method='PUT')
+
+class IndexHandler(BaseHandler):
   index_template = None
   def get(self):
     # self.render() would compress whitespace after it meets '{{' even in <pre>
@@ -116,86 +207,14 @@ class IndexHandler(tornado.web.RequestHandler):
     self.write(content)
 
   async def post(self):
-    # Check the user has been blocked or not
-    user = model.get_user_by_ip(self.request.remote_ip)
-    if user is None:
-      uid = model.add_user(self.request.remote_ip)
-    else:
-      if user['blocked']:
-        raise tornado.web.HTTPError(403, 'You are on our blacklist.')
-      else:
-        uid = user['id']
+    return await self._process_upload(method='POST')
 
-    # Check whether password is required
-    expected_password = self.settings['password']
-    if expected_password and \
-      not compare_digest(self.get_argument('password'), expected_password):
-        raise tornado.web.HTTPError(403, 'You need a valid password to post.')
-
-    files = self.request.files
-    if not files:
-      raise tornado.web.HTTPError(400, 'upload your image please')
-
-    ret = OrderedDict()
-    url_prefix = self.request.full_url()
-    if '?' in url_prefix:
-      url_prefix = url_prefix.split('?', 1)[0]
-    url_prefix = url_prefix.rstrip('/')
-
-    for filelist in files.values():
-      for file in filelist:
-        m = hashlib.sha1()
-        m.update(file['body'])
-        h = m.hexdigest()
-        model.add_image(uid, h, file['filename'], len(file['body']))
-        ftype = guess_mime_using_file(file['body'])[0]
-        if ftype in RISKY_TYPES:
-          await check_executable(
-            self.request.remote_ip,
-            h, file['body'], file['filename'])
-
-        d = h[:2]
-        f = h[2:]
-        p = os.path.join(self.settings['datadir'], d)
-        if not os.path.exists(p):
-          os.mkdir(p, 0o750)
-        fpath = os.path.join(p, f)
-        if not os.path.exists(fpath):
-          try:
-            with open(fpath, 'wb') as img_file:
-              img_file.write(file['body'])
-          except IOError:
-            logging.exception('failed to open the file: %s', fpath)
-            ret[file['filename']] = 'FAIL'
-            self.set_status(500)
-            continue
-
-        ext = None
-        if ftype:
-          ext = guess_extension(ftype)
-        if ext:
-          f += ext
-        ret[file['filename']] = '%s/%s/%s' % (url_prefix, d, f)
-
-    output_qr = self.get_argument('qr', None) is not None
-    if len(ret) > 1:
-      for item in ret.items():
-        self.write('%s: %s\n' % item)
-        if output_qr:
-          self.write('%s\n' % qrencode(item[1]))
-    elif ret:
-      img_url = tuple(ret.values())[0]
-      self.write("%s\n" % img_url)
-      if output_qr:
-        self.write('%s\n' % qrencode(img_url))
-    logging.info('%s posted: %s', self.request.remote_ip, ret)
-
-class ToolHandler(tornado.web.RequestHandler):
+class ToolHandler(BaseHandler):
   def get(self):
     self.set_header('Content-Type', 'text/x-python')
     self.render('elimage', url=self.request.full_url()[:-len(SCRIPT_PATH)])
 
-class HashHandler(tornado.web.RequestHandler):
+class HashHandler(BaseHandler):
   def get(self, p):
     if '.' in p:
       h, ext = p.split('.', 1)
@@ -216,7 +235,7 @@ BOTS = [
   'facebookexternalhit',
 ]
 
-class FileHandler(tornado.web.StaticFileHandler):
+class FileHandler(BaseHandler, tornado.web.StaticFileHandler):
   def set_extra_headers(self, path):
     self.set_header("Cache-Control", "public, max-age=" + str(86400 * 365))
 
@@ -296,6 +315,7 @@ def main():
       'path': options.datadir,
     }),
     (r"/([a-fA-F0-9/]+(?:\.\w*)?)", HashHandler),
+    (r"/.*", BaseHandler),
   ],
     datadir=options.datadir,
     debug=config.DEBUG,
