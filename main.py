@@ -212,7 +212,8 @@ class HashHandler(tornado.web.RequestHandler):
 BOTS = [
   'Discordbot', 'TelegramBot', 'YandexImages', 'bingbot', 'Googlebot',
   'PetalBot', 'Pinterestbot', 'DotBot', 'MJ12bot', 'AhrefsBot',
-  'aranhabot', 'DuckDuckBot', 'SeznamBot',
+  'aranhabot', 'DuckDuckBot', 'SeznamBot', 'Twitterbot', 'facebookexternalhit',
+  'facebookexternalhit',
 ]
 
 class FileHandler(tornado.web.StaticFileHandler):
