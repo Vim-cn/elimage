@@ -84,6 +84,9 @@ def open_noatime(file, mode='r'):
   return os.fdopen(fd, mode)
 
 class BaseHandler(tornado.web.RequestHandler):
+  def get(self, *args, **kwargs):
+    raise tornado.web.HTTPError(404)
+
   async def _process_upload(self, method):
     # Check the user has been blocked or not
     user = model.get_user_by_ip(self.request.remote_ip)
