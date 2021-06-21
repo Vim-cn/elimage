@@ -238,7 +238,7 @@ BOTS = [
   'facebookexternalhit',
 ]
 
-class FileHandler(BaseHandler, tornado.web.StaticFileHandler):
+class FileHandler(tornado.web.StaticFileHandler, BaseHandler):
   def set_extra_headers(self, path):
     self.set_header("Cache-Control", "public, max-age=" + str(86400 * 365))
 
